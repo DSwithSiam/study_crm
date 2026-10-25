@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS)
 ## For Study Track CRM (Study CRM Workspace)
 
-**Document Reference:** `SRS-STRACK-2026-V3.0`  
+**Document Reference:** `SRS-STRACK-2026-V3.1`  
 **Standard:** IEEE Std 830-1998 / ISO/IEC/IEEE 29148:2018 Compliant  
 **Initial Release Date:** 19 September 2026  
 **Current Revision Date:** 25 October 2026  
@@ -18,13 +18,15 @@
 | **2.0** | 08 Oct 2026 | Technical Lead & Systems Analyst | Added Multi-Application, Document Verification & Visa Cases | Lead Architect |
 | **2.1** | 20 Oct 2026 | Security & Compliance Lead | Added Dynamic Role & Granular Permission System (RBAC) | CISO |
 | **3.0** | 25 Oct 2026 | Core Engineering & Product Group | Full IEEE 830 Formal Restructure, Database DDL & Traceability | Executive Committee |
+| **3.1** | 25 Oct 2026 | Enterprise SaaS Architecture Team | Added B2B Agency Onboarding: Sign-up, OTP, Demo Request, and Super Admin Approval Workflow | Platform Architect |
 
 ### Sign-off & Approval Matrix
 
 | Role | Name | Title / Department | Signature / Status |
 | :--- | :--- | :--- | :--- |
-| **Product Owner** | T. H. Talukder | Chief Executive Officer (CEO) | *APPROVED* |
-| **Project Manager** | Sarah Islam | Senior Recruitment & Operations Manager | *APPROVED* |
+| **Platform Super Admin** | SaaS System Owner | Enterprise Cloud Solutions | *APPROVED* |
+| **Agency Product Owner** | T. H. Talukder | Chief Executive Officer (CEO, Study Track) | *APPROVED* |
+| **Operations Director** | Sarah Islam | Senior Recruitment & Operations Manager | *APPROVED* |
 | **Lead Architect** | Engineering Lead | Enterprise Systems Division | *APPROVED* |
 | **QA Director** | Quality Assurance Lead | Software Testing & Verification | *APPROVED* |
 
@@ -35,29 +37,30 @@
    - 1.1 [Purpose](#11-purpose)
    - 1.2 [Document Conventions](#12-document-conventions)
    - 1.3 [Intended Audience & Reading Suggestions](#13-intended-audience--reading-suggestions)
-   - 1.4 [Project Scope](#14-project-scope)
+   - 1.4 [Project Scope & Multi-Tenant SaaS Model](#14-project-scope--multi-tenant-saas-model)
    - 1.5 [Applicable Standards & References](#15-applicable-standards--references)
    - 1.6 [Definitions, Acronyms, and Abbreviations](#16-definitions-acronyms-and-abbreviations)
 2. [Overall Description](#2-overall-description)
-   - 2.1 [Product Perspective](#21-product-perspective)
+   - 2.1 [Product Perspective & Two-Tier Admin Ecosystem](#21-product-perspective--two-tier-admin-ecosystem)
    - 2.2 [Product Functions Summary](#22-product-functions-summary)
-   - 2.3 [User Classes and Characteristics](#23-user-classes-and-characteristics)
+   - 2.3 [User Classes and Characteristics (Platform vs Agency)](#23-user-classes-and-characteristics-platform-vs-agency)
    - 2.4 [Operating Environment](#24-operating-environment)
    - 2.5 [Design and Implementation Constraints](#25-design-and-implementation-constraints)
    - 2.6 [User Documentation](#26-user-documentation)
    - 2.7 [Assumptions and Dependencies](#27-assumptions-and-dependencies)
 3. [System Features & Functional Requirements](#3-system-features--functional-requirements)
-   - 3.1 [Authentication & Multi-Tenant Branch Management](#31-system-feature-authentication--multi-tenant-branch-management)
-   - 3.2 [Dynamic Custom Role & Granular Permission Engine (RBAC)](#32-system-feature-dynamic-custom-role--granular-permission-engine-rbac)
-   - 3.3 [Lead Capture, Deduping & Pipeline Engine](#33-system-feature-lead-capture-deduping--pipeline-engine)
-   - 3.4 [Student Dossier & 360° Case Management](#34-system-feature-student-dossier--360-case-management)
-   - 3.5 [Multi-Application Lifecycle Tracking](#35-system-feature-multi-application-lifecycle-tracking)
-   - 3.6 [Document Review, Versioning & Quality Assurance](#36-system-feature-document-review-versioning--quality-assurance)
-   - 3.7 [Visa Processing & Compliance Management](#37-system-feature-visa-processing--compliance-management)
-   - 3.8 [Program Finder, Comparison & Eligibility Engine](#38-system-feature-program-finder-comparison--eligibility-engine)
-   - 3.9 [Accounts, Service Invoicing & Commission Ledger](#39-system-feature-accounts-service-invoicing--commission-ledger)
-   - 3.10 [Operations: Employee Attendance, Tasks & Appointments](#310-system-feature-operations-employee-attendance-tasks--appointments)
-   - 3.11 [Communication Firewall & Student Self-Service Portal](#311-system-feature-communication-firewall--student-self-service-portal)
+   - 3.1 [Agency Onboarding: Sign-Up, OTP Verification & Demo Workspace Request](#31-system-feature-agency-onboarding-sign-up-otp-verification--demo-workspace-request)
+   - 3.2 [Authentication & Multi-Tenant Branch Management](#32-system-feature-authentication--multi-tenant-branch-management)
+   - 3.3 [Dynamic Custom Role & Granular Permission Engine (RBAC)](#33-system-feature-dynamic-custom-role--granular-permission-engine-rbac)
+   - 3.4 [Lead Capture, Deduping & Pipeline Engine](#34-system-feature-lead-capture-deduping--pipeline-engine)
+   - 3.5 [Student Dossier & 360° Case Management](#35-system-feature-student-dossier--360-case-management)
+   - 3.6 [Multi-Application Lifecycle Tracking](#36-system-feature-multi-application-lifecycle-tracking)
+   - 3.7 [Document Review, Versioning & Quality Assurance](#37-system-feature-document-review-versioning--quality-assurance)
+   - 3.8 [Visa Processing & Compliance Management](#38-system-feature-visa-processing--compliance-management)
+   - 3.9 [Program Finder, Comparison & Eligibility Engine](#39-system-feature-program-finder-comparison--eligibility-engine)
+   - 3.10 [Accounts, Service Invoicing & Commission Ledger](#310-system-feature-accounts-service-invoicing--commission-ledger)
+   - 3.11 [Operations: Employee Attendance, Tasks & Appointments](#311-system-feature-operations-employee-attendance-tasks--appointments)
+   - 3.12 [Communication Firewall & Student Self-Service Portal](#312-system-feature-communication-firewall--student-self-service-portal)
 4. [External Interface Requirements](#4-external-interface-requirements)
    - 4.1 [User Interfaces (UI/UX)](#41-user-interfaces-uiux)
    - 4.2 [Hardware Interfaces](#42-hardware-interfaces)
@@ -81,147 +84,135 @@
 ## 1. Introduction
 
 ### 1.1 Purpose
-This Software Requirements Specification (SRS) establishes the complete operational, functional, behavioral, and non-functional baseline for **Study Track CRM (Study CRM Workspace)**, Version 3.0. This document serves as the binding contract between business stakeholders, software architects, implementation engineers, quality assurance teams, and system administrators.
+This Software Requirements Specification (SRS) establishes the complete operational, functional, behavioral, and non-functional baseline for **Study Track CRM (Study CRM Workspace)**, Version 3.1. This document serves as the formal architectural blueprint governing the platform's multi-tenant SaaS architecture, agency onboarding lifecycle, custom role administration, and overseas student case workflows.
 
 ### 1.2 Document Conventions
-This specification complies with the standard conventions of IEEE Std 830-1998 and RFC 2119.
-- **Requirement Identifiers:** Unique alphanumeric tags in the form `REQ-[MODULE]-[NUMBER]` (e.g., `REQ-LEAD-001`, `REQ-RBAC-004`).
+This specification complies with IEEE Std 830-1998 and RFC 2119.
+- **Requirement Identifiers:** Unique alphanumeric tags in the form `REQ-[MODULE]-[NUMBER]` (e.g., `REQ-AGY-001`, `REQ-LEAD-001`, `REQ-RBAC-004`).
 - **Modal Verbs (RFC 2119):**
   - **SHALL / MUST:** Denotes an absolute, mandatory requirement for system compliance.
-  - **SHOULD / RECOMMENDED:** Denotes a valid design recommendation that may be overridden only after architectural justification.
-  - **MAY / OPTIONAL:** Denotes an elective capability.
+  - **SHOULD / RECOMMENDED:** Denotes a recommended design practice.
+  - **MAY / OPTIONAL:** Denotes an elective feature.
   - **SHALL NOT / MUST NOT:** Denotes an absolute prohibition.
-- **Priority Classification (MoSCoW):** Every requirement is designated as **Must Have (M)**, **Should Have (S)**, **Could Have (C)**, or **Won't Have (W)** for initial baseline releases.
+- **Priority Classification (MoSCoW):** Every requirement is designated as **Must Have (M)**, **Should Have (S)**, **Could Have (C)**, or **Won't Have (W)**.
 
 ### 1.3 Intended Audience & Reading Suggestions
-1. **Executive Stakeholders / CEO:** Read Section 1 (Vision), Section 2.2 (Functions), and Section 5.5 (Business Rules).
-2. **Software Developers & Architects:** Read Section 2, Section 3 (System Features in full detail), Section 4, Section 5, and Section 6 (Data Schema).
-3. **Quality Assurance & Verification Teams:** Focus on Section 3 (Stimulus/Response), Section 5, and Section 7 (Acceptance & Traceability Matrix).
-4. **Operations & Branch Managers:** Review Section 2.3 (User Classes), Section 3.2 (RBAC), and Section 3.10 (Operations).
+1. **Platform Owner / SaaS Master Admins:** Read Section 1.4, Section 2.1, Section 2.3 (Platform Super Admin), and Section 3.1 (Agency Onboarding & Approval).
+2. **Agency Executives / Agency Admins:** Read Section 2.3, Section 3.1 through Section 3.5, Section 3.10, and Section 5.5.
+3. **Software Engineers & Solution Architects:** Review all sections in detail, with emphasis on Section 2, Section 3, Section 5, and Section 6 (PostgreSQL DDL).
+4. **Quality Assurance Engineers:** Focus on Section 3 (Stimulus/Response), Section 5, and Section 7 (Acceptance & Traceability Matrix).
 
-### 1.4 Project Scope
-Study Track CRM is an integrated, multi-branch Enterprise Resource Planning (ERP) and Customer Relationship Management (CRM) platform engineered exclusively for study-abroad agencies and educational consulting firms.
+### 1.4 Project Scope & Multi-Tenant SaaS Model
+Study Track CRM operates as a **Multi-Tenant B2B Software-as-a-Service (SaaS)** platform engineered for study-abroad agencies and visa consultancy businesses.
 
-#### In-Scope:
-- Multi-branch operational management (Dhaka Head Office, Tangail Branch, and future subsidiaries).
-- Unified multi-channel lead ingestion with algorithmic deduplication.
-- Visual Kanban-based student recruitment and case-intake pipelines.
-- Multi-application university tracking with independent visa compliance modules.
-- Document repository featuring version control (`v1`, `v2`, etc.), inline quality screening, and correction feedback.
-- Program search catalogue featuring multi-factor filters and real-time student academic eligibility evaluation.
-- Local currency (BDT) agency service invoicing alongside multi-currency institutional commission aging and office expense ledgers.
-- Dynamic custom role creation with three-tier granular data scoping (`OWN`, `BRANCH`, `GLOBAL`).
-- Separate, secure, read-only/upload-enabled Student Self-Service Portal.
-
-#### Out-of-Scope (Deferred to Future Revisions):
-- Direct programmatic submission into sovereign immigration databases (e.g., direct API injection into IRCC Canada or Australian Home Affairs).
-- Automated AI-driven visa guarantee algorithms.
-- Core banking ledger integration for international wire transfers (remittance recorded via manual credit advice reconciliation).
-
-### 1.5 Applicable Standards & References
-1. **IEEE Std 830-1998:** IEEE Recommended Practice for Software Requirements Specifications.
-2. **ISO/IEC/IEEE 29148:2018:** Systems and software engineering — Life cycle processes — Requirements engineering.
-3. **RFC 2119:** Key words for use in RFCs to Indicate Requirement Levels.
-4. **OWASP Top 10 (2021):** Open Web Application Security Project Standards for Web Application Security.
-5. **GDPR / Bangladesh Cyber Security & Data Privacy Guidelines:** Principles regarding personal student identity data handling.
-
-### 1.6 Definitions, Acronyms, and Abbreviations
-
-| Term / Acronym | Definition |
-| :--- | :--- |
-| **CAS** | Confirmation of Acceptance for Studies (UK Student Visa prerequisite). |
-| **CoE** | Confirmation of Enrolment (Australian Student Visa prerequisite). |
-| **CRM** | Customer Relationship Management system. |
-| **Dossier** | The centralized, complete master record of a student containing all biographical, academic, financial, application, and visa records. |
-| **ERD** | Entity-Relationship Diagram. |
-| **GIC** | Guaranteed Investment Certificate (Canadian SDS visa financial requirement). |
-| **GS / GTE** | Genuine Student / Genuine Temporary Entrant requirement (Australia). |
-| **I-20** | Certificate of Eligibility for Nonimmigrant Student Status (USA). |
-| **LOA** | Letter of Acceptance (Canada). |
-| **MFS** | Mobile Financial Services (e.g., bKash, Nagad, Rocket). |
-| **MIME** | Multipurpose Internet Mail Extensions (file format validation standard). |
-| **MFA** | Multi-Factor Authentication. |
-| **P&L** | Profit and Loss financial statement. |
-| **RBAC** | Role-Based Access Control. |
-| **RTM** | Requirements Traceability Matrix. |
-| **SDS** | Student Direct Stream (Expedited Canadian study permit category). |
-| **SLA** | Service Level Agreement. |
-| **TTL** | Time-To-Live (token/session expiration duration). |
-| **VFS** | Visa Facilitation Services (Biometric and consular collection agency). |
+#### The Two-Tier Administrative Hierarchy:
+1. **Tier 1: Platform Super Admin Panel (SaaS Provider / Platform Owner):**
+   - High-level control over all registered agency organizations (tenants).
+   - Manages incoming agency registrations, contact verifications, and demo/trial activation requests.
+   - Evaluates agency business viability and provisions demo or production agency workspaces.
+   - Manages platform-wide subscription billing, health metrics, and global system configurations.
+2. **Tier 2: Agency Admin Panel (Tenant Workspace — e.g., Study Track):**
+   - The dedicated operational command center for an approved educational agency.
+   - Manages the agency's physical branches (e.g., Dhaka Head Office, Tangail Branch).
+   - Configures custom roles, access permissions, counselors, admissions specialists, and accountants.
+   - Manages student leads, applications, document screening, and commission receivables.
 
 ---
 
 ## 2. Overall Description
 
-### 2.1 Product Perspective
-Study Track CRM operates as a centralized Software-as-a-Service (SaaS) web application running in a high-availability cloud architecture. It replaces disconnected spreadsheets, local filing cabinets, and generic CRM systems with an integrated case workflow designed specifically for overseas education consultancy.
+### 2.1 Product Perspective & Two-Tier Admin Ecosystem
 
 ```
-+--------------------------------------------------------------------------------------------------------+
-|                                  STUDY TRACK ENTERPRISE ECOSYSTEM                                      |
-+--------------------------------------------------------------------------------------------------------+
-|   PUBLIC INGESTION      |                     CORE CRM PLATFORM                     |  EXTERNAL APIS   |
-|                         |                                                           |                  |
-| [ Website Form ]        |  +--------------------+  +-----------------------------+  | [ WhatsApp Cloud]|
-| [ Facebook Lead Ads ] --+->| Ingestion & Dedup  |->| Multi-Branch Workspaces     |--+-> [ Mailgun/SES] |
-| [ Walk-in Inquiries ]   |  +--------------------+  | (Dhaka HQ / Tangail Branch) |  | [ AWS S3/Storage]|
-|                         |                          +-----------------------------+  | [ SSLCommerz MFS]|
-|                         |                          | - Leads & Student Dossiers  |  |                  |
-|                         |                          | - Applications & Visas      |  |                  |
-|                         |                          | - Document Verification     |  |                  |
-|   STUDENT ACCESS        |                          | - Invoicing & Commissions   |  |                  |
-|                         |                          +-----------------------------+  |                  |
-| [ Student Self-Service ]|  +--------------------+                 |                 |                  |
-| [ Mobile / Desktop Web] +->| Auth & OTP Engine  |-----------------+                 |                  |
-|                         |  +--------------------+                                   |                  |
-+--------------------------------------------------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------------------+
+|                                      PLATFORM SUPER ADMIN CONTROL PLANE                                       |
+|                                         (SaaS Provider Master Panel)                                          |
+|                                                                                                               |
+| [ Agency Signup Flow ] ---> [ 6-Digit OTP Verification ] ---> [ Agency Submits Demo CRM Request ]             |
+|                                                                              |                                |
+|                                                                              v                                |
+|                                                      +-----------------------------------+                    |
+|                                                      | Super Admin Demo Review Queue     |                    |
+|                                                      | - Verify Agency Identity & Volume |                    |
+|                                                      | - [ APPROVE DEMO ] / [ REJECT ]   |                    |
+|                                                      +-----------------------------------+                    |
+|                                                                      |                                        |
++----------------------------------------------------------------------|----------------------------------------+
+                                                                       | Provisions Isolated Tenant Workspace
+                                                                       v
++---------------------------------------------------------------------------------------------------------------+
+|                                         AGENCY ADMIN WORKSPACE (TENANT)                                       |
+|                                            (e.g., Study Track Agency)                                         |
+|                                                                                                               |
+|  +---------------------------------------------------------------------------------------------------------+  |
+|  | AGENCY ADMIN PANEL (Branch & Team Setup)                                                                |  |
+|  | - Configure Branches: Dhaka Head Office, Tangail Branch                                                 |  |
+|  | - Dynamic Role Builder: Senior Counselor, Canada Specialist, Finance Officer                           |  |
+|  | - Staff Management & Biometric/IP Attendance Clock                                                      |  |
+|  +---------------------------------------------------------------------------------------------------------+  |
+|                                                      |                                                        |
+|                                                      v                                                        |
+|  +---------------------------------------------------------------------------------------------------------+  |
+|  | AGENCY CORE CASE OPERATIONS                                                                             |  |
+|  | - Lead Capture & Kanban Pipeline          - Multi-Application University Hub                            |  |
+|  | - Student 360° Dossier Repository         - Quality Assurance Document Verification                     |  |
+|  | - Program Finder & Eligibility Checker     - Country-Specific Visa Compliance (SDS, GS, CAS)             |  |
+|  | - Agency BDT Invoicing & Receipts         - Foreign University Commission Aging                         |  |
+|  +---------------------------------------------------------------------------------------------------------+  |
+|                                                      |                                                        |
+|                                                      v                                                        |
+|  +---------------------------------------------------------------------------------------------------------+  |
+|  | STUDENT SELF-SERVICE PORTAL                                                                             |  |
+|  | - Progress Tracker (8 Stages)             - Document Replacement Station                                |  |
+|  | - Service Invoice Review & Receipts       - Secure Messaging with Assigned Counselor                    |  |
+|  +---------------------------------------------------------------------------------------------------------+  |
++---------------------------------------------------------------------------------------------------------------+
 ```
 
 ### 2.2 Product Functions Summary
-1. **Lead Lifecycle Engine:** Multi-source capture, E.164 normalization, collision screening, and Kanban-based phase migration.
-2. **Student 360° Repository:** Immutable master dossiers containing personal, emergency, passport, academic history, and application records.
-3. **Multi-Application Hub:** Parallel multi-institution tracking with automated task generation and deadline alerts.
-4. **Quality Assurance Document Verification:** Multi-tier file checklist with version control, reviewer sign-offs, and corrective loop alerts.
-5. **Program Search & Algorithmic Matchmaker:** Real-time program finder filtering by budget, tests, and academic cutoffs, featuring a side-by-side comparison matrix.
-6. **Finance & Dual Ledger:** Client agency fee billing (BDT) isolated from foreign currency institutional commission receivables (AUD, CAD, GBP, EUR, USD).
-7. **Dynamic Role Builder (RBAC):** Customizable security profiles featuring module-level action permissions and 3-tier data scopes (`OWN`, `BRANCH`, `GLOBAL`).
-8. **Student Portal:** Transparent status tracker, document replacement upload station, invoice review, and direct counselor messaging.
+1. **Agency Onboarding Engine:** Self-service registration, 6-digit OTP verification, demo CRM application submission, and automated approval notification.
+2. **Tenant Provisioning Engine:** Sandbox creation, trial expiration countdown (14/30 days), and sample data initialization.
+3. **Multi-Branch Hierarchy:** Isolated operational branches (e.g., Dhaka HQ, Tangail Branch) under single agency billing.
+4. **Dynamic RBAC Engine:** Customizable security profiles featuring module action permissions and 3-tier data scopes (`OWN`, `BRANCH`, `GLOBAL`).
+5. **Lead & Student Case Management:** De-duplicated lead capture, Kanban progression, and permanent 360° student dossiers.
+6. **Multi-Application Tracking:** Independent parallel university submissions with document quality gating.
+7. **Document Quality Screening:** Version-controlled file uploads with review notes and student remediation feedback.
+8. **Dual-Currency Ledger:** Agency service fee billing (BDT) isolated from foreign university commissions (AUD, CAD, GBP, EUR, USD).
 
-### 2.3 User Classes and Characteristics
+### 2.3 User Classes and Characteristics (Platform vs Agency)
 
-| User Class | Typical User | Technical Expertise | System Rights & Scope |
+| User Class | Administrative Tier | Typical User | Rights & System Scope |
 | :--- | :--- | :--- | :--- |
-| **Super Admin** | CEO / Managing Director / System Architect | Advanced | Global organization oversight; full configuration; system audit; financial ledger control; dynamic role setup. |
-| **Branch Manager** | Head of Branch (Dhaka / Tangail) | Intermediate | Manages branch staff; reassigns leads; approves branch office expenses; oversees branch conversions and attendance. |
-| **Senior Counselor** | Educational Counselor / Case Lead | Intermediate | Manages assigned leads; conducts profile evaluations; matches programs; creates application drafts. |
-| **Admissions Officer** | University Application Specialist | Intermediate | Performs technical reviews of academic documents; officially lodges applications; records university decisions. |
-| **Visa Officer** | Visa & Compliance Specialist | Advanced | Prepares country-specific visa files; screens financial affidavits; schedules biometrics; records visa outcomes. |
-| **Finance Officer** | Agency Accountant | Intermediate | Issues service invoices; records MFS/cash receipts; tracks institutional commission aging; reviews expense claims. |
-| **Student** | Overseas Applicant / Parent | Novice | Restricted to self-service portal: views own application status, uploads requested documents, pays service fees. |
+| **Platform Super Admin** | **Platform Owner** | SaaS Provider CTO / Master Admin | Oversees all registered agencies; reviews demo requests; approves/suspends tenants; views global platform analytics. |
+| **Agency Admin** | **Agency Tenant** | Agency CEO / Managing Director | Full control of their agency workspace: configures branches, creates custom roles, invites employees, monitors agency P&L. |
+| **Branch Manager** | **Agency Tenant** | Head of Branch (Dhaka / Tangail) | Manages branch staff; reassigns leads; approves office expenses; oversees branch conversions and attendance. |
+| **Senior Counselor** | **Agency Tenant** | Educational Counselor | Manages assigned leads; conducts profile evaluations; matches programs; creates application drafts. |
+| **Admissions Officer** | **Agency Tenant** | University Admissions Specialist | Reviews academic documents; lodges university applications; records offer decisions. |
+| **Visa Officer** | **Agency Tenant** | Visa Compliance Officer | Prepares country-specific visa files; verifies financial affidavits; records visa outcomes. |
+| **Finance Officer** | **Agency Tenant** | Agency Accountant | Issues BDT service invoices; records MFS receipts; tracks foreign commission aging and branch expenses. |
+| **Student** | **End User** | Prospective Overseas Student | Restricted to student portal: tracks application progress, uploads requested documents, reviews invoices. |
 
 ### 2.4 Operating Environment
-- **Server Platform:** Linux (Ubuntu 22.04 LTS / Debian 12), Node.js LTS runtime / Python runtime.
-- **Database Engine:** PostgreSQL 15+ (Relational engine with JSONB support for dynamic schemas).
-- **Client Web Browsers:** Modern evergreen browsers: Google Chrome (v110+), Mozilla Firefox (v110+), Apple Safari (v16+), Microsoft Edge (v110+).
-- **Client Devices:** Responsive viewport reflow down to $360\text{px}$ width (smartphones, tablets, laptops, multi-monitor desktop workstations).
-- **File Storage Infrastructure:** Private cloud object store (AWS S3 / Google Cloud Storage / MinIO) enforcing strict private-bucket policies.
+- **Server Platform:** Linux (Ubuntu 22.04 LTS / Debian 12), Node.js LTS / Python containerized via Docker and Kubernetes.
+- **Database Engine:** PostgreSQL 15+ with row-level security (RLS) enforcing tenant isolation (`agency_id`).
+- **Client Web Browsers:** Evergreen browsers: Google Chrome (v110+), Mozilla Firefox (v110+), Apple Safari (v16+), Microsoft Edge (v110+).
+- **Client Devices:** Responsive layout reflowing across desktop workstations, tablets, and smartphones down to $360\text{px}$ width.
+- **File Storage Infrastructure:** Private cloud object store (AWS S3 / Google Cloud Storage) with bucket policies forbidding public read access.
 
 ### 2.5 Design and Implementation Constraints
-1. **Regulatory Compliance:** Adherence to Bangladesh Information and Communication Technology laws and international principles of GDPR regarding student personal identifiable information (PII).
-2. **Data Residency & Security:** All communication over public networks must use TLS 1.3 encryption. Passwords and credentials must never be stored in plaintext.
-3. **Network Constraints:** The system must remain fully functional and responsive over standard mobile broadband ($3\text{G}/4\text{G}$ connections with latency up to $300\text{ ms}$).
-4. **Zero Data Leakage:** Counselor internal evaluation remarks, agency commission margins, and other students' dossiers must never be exposed over public-facing APIs.
+1. **Multi-Tenant Data Isolation:** Queries for agency data must strictly include `agency_id` in execution filters or database Row-Level Security policies to prevent cross-tenant data leaks.
+2. **Privacy Firewall:** Agency internal remarks, commission rates, and employee private notes must never leak to student portal views.
+3. **Regulatory Compliance:** Adherence to Bangladesh Information and Communication Technology Act and international student data privacy guidelines (GDPR / FERPA standards).
+4. **Network Resilience:** Mobile-first responsive optimization designed to function smoothly over $3\text{G}/4\text{G}$ mobile internet with latency up to $300\text{ ms}$.
 
 ### 2.6 User Documentation
-The system shall deliver:
-- Integrated contextual help tooltips for complex eligibility and visa rules.
-- Administrator guide for dynamic role configuration and branch setup.
-- Interactive student onboarding guide within the self-service portal.
+- Platform Super Admin operations guide for tenant provisioning and demo request audits.
+- Agency Admin onboarding guide for branch configuration and dynamic role setup.
+- Interactive student guide within the self-service portal.
 
 ### 2.7 Assumptions and Dependencies
-- Agency branches maintain stable internet connectivity.
-- Third-party email delivery services (Mailgun/SendGrid/SES) and WhatsApp Business API maintain $\ge 99.5\%$ operational uptime.
-- Institutional program requirements and tuition fees in the catalogue are updated and verified periodically by admissions personnel.
+- Agency Admins maintain active corporate email and mobile accounts capable of receiving OTP tokens.
+- Third-party email delivery services (SendGrid/SES) and SMS gateways maintain $\ge 99.5\%$ operational uptime.
 
 ---
 
@@ -229,106 +220,132 @@ The system shall deliver:
 
 ```
                                   SYSTEM FEATURE ARCHITECTURE
-+-------------------------------------------------------------------------------------------------------+
-|  3.1 AUTHENTICATION & MULTI-BRANCH WORKSPACES                                                         |
-|      +-- REQ-AUTH-001 (Multi-Factor Login)         +-- REQ-AUTH-002 (Branch Tenant Context)           |
-+-------------------------------------------------------------------------------------------------------+
-|  3.2 DYNAMIC CUSTOM ROLES & RBAC ENGINE                                                               |
-|      +-- REQ-RBAC-001 (Role Definition)            +-- REQ-RBAC-002 (3-Tier Scope Modifiers)          |
-|      +-- REQ-RBAC-003 (Matrix Authorization Engine)+-- REQ-RBAC-004 (Anti-Privilege Escalation)       |
-+-------------------------------------------------------------------------------------------------------+
-|  3.3 LEAD CAPTURE & RECRUITMENT PIPELINE                                                              |
-|      +-- REQ-LEAD-001 (Normalized Ingestion)       +-- REQ-LEAD-002 (Collision Screening)            |
-|      +-- REQ-LEAD-003 (Academic Matrix Capture)    +-- REQ-LEAD-004 (Visual Kanban Stage Machine)     |
-+-------------------------------------------------------------------------------------------------------+
-|  3.4 STUDENT DOSSIER (360° MANAGEMENT)             |  3.5 MULTI-APPLICATION HUB                      |
-|      +-- REQ-STU-001 (Master Dossier Generator)    |      +-- REQ-APP-001 (Multi-App Binding)         |
-|      +-- REQ-STU-002 (Conversion Gate Gating)      |      +-- REQ-APP-002 (State Progression Machine) |
-|      +-- REQ-STU-003 (PDF Dossier Export Engine)   |      +-- REQ-APP-003 (SLA Action Due Alerter)    |
-+----------------------------------------------------+--------------------------------------------------+
-|  3.6 DOCUMENT VERIFICATION & QUALITY QA            |  3.7 VISA PROCESSING & COMPLIANCE                |
-|      +-- REQ-DOC-001 (Country Checklist Repository)|      +-- REQ-VISA-001 (Case Milestone Workflow)  |
-|      +-- REQ-DOC-002 (Immutable Version Trees)     |      +-- REQ-VISA-002 (Compliance Screeners)     |
-|      +-- REQ-DOC-003 (Reviewer Action Loop)        |      +-- REQ-VISA-003 (Decision & Refusal Archive)|
-+----------------------------------------------------+--------------------------------------------------+
-|  3.8 PROGRAM FINDER & MATCHMAKING                  |  3.9 ACCOUNTS, INVOICING & COMMISSIONS           |
-|      +-- REQ-PROG-001 (Multi-Facet Filter Engine)  |      +-- REQ-FIN-001 (Agency Service Invoicing)  |
-|      +-- REQ-PROG-002 (Side-by-Side Comparison)    |      +-- REQ-FIN-002 (Foreign Commission Aging)  |
-|      +-- REQ-PROG-003 (Algorithmic Fit Checker)    |      +-- REQ-FIN-003 (Office Expense Approval)   |
-+----------------------------------------------------+--------------------------------------------------+
-|  3.10 OPERATIONS & AGENCY GOVERNANCE               |  3.11 COMMUNICATION & STUDENT PORTAL             |
-|      +-- REQ-OPS-001 (Biometric/IP Attendance Clock|      +-- REQ-PORT-001 (Student Tracker Station)  |
-|      +-- REQ-OPS-002 (Task & Appointment Dispatch) |      +-- REQ-COMM-001 (Dual-Channel Firewall)    |
-|      +-- REQ-OPS-003 (Inter-Branch Lead Handover)  |      +-- REQ-COMM-002 (WhatsApp/SMS Event Dispatch|
-+-------------------------------------------------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------------------+
+|  3.1 AGENCY ONBOARDING & DEMO REQUEST WORKFLOW                                                                |
+|      +-- REQ-AGY-001 (Agency Registration)         +-- REQ-AGY-002 (Contact OTP Verification)                 |
+|      +-- REQ-AGY-003 (Demo Request Submission)     +-- REQ-AGY-004 (Super Admin Review Queue)                 |
+|      +-- REQ-AGY-005 (Workspace Provisioning)      +-- REQ-AGY-006 (Agency Admin Panel Handover)              |
++---------------------------------------------------------------------------------------------------------------+
+|  3.2 AUTHENTICATION & MULTI-TENANT WORKSPACES     |  3.3 DYNAMIC CUSTOM ROLES & RBAC ENGINE                   |
+|      +-- REQ-AUTH-001 (Multi-Factor Login)        |      +-- REQ-RBAC-001 (Role Definition)                   |
+|      +-- REQ-AUTH-002 (Branch Tenant Context)     |      +-- REQ-RBAC-002 (3-Tier Scope Modifiers)            |
++---------------------------------------------------+-----------------------------------------------------------+
+|  3.4 LEAD CAPTURE & PIPELINE                      |  3.5 STUDENT DOSSIER (360° MANAGEMENT)                    |
+|      +-- REQ-LEAD-001 (Normalized Ingestion)      |      +-- REQ-STU-001 (Master Dossier Generator)           |
+|      +-- REQ-LEAD-002 (Collision Screening)       |      +-- REQ-STU-002 (Conversion Gate Gating)             |
++---------------------------------------------------+-----------------------------------------------------------+
+|  3.6 MULTI-APPLICATION HUB                        |  3.7 DOCUMENT VERIFICATION & QUALITY QA                   |
+|      +-- REQ-APP-001 (Multi-App Binding)          |      +-- REQ-DOC-001 (Country Checklist Repository)       |
+|      +-- REQ-APP-002 (State Progression Machine)  |      +-- REQ-DOC-002 (Immutable Version Trees)            |
++---------------------------------------------------+-----------------------------------------------------------+
+|  3.8 VISA PROCESSING & COMPLIANCE                 |  3.9 PROGRAM FINDER & MATCHMAKING                         |
+|      +-- REQ-VISA-001 (Case Milestone Workflow)   |      +-- REQ-PROG-001 (Multi-Facet Filter Engine)         |
+|      +-- REQ-VISA-002 (Compliance Screeners)      |      +-- REQ-PROG-002 (Algorithmic Fit Checker)           |
++---------------------------------------------------+-----------------------------------------------------------+
+|  3.10 ACCOUNTS, INVOICING & COMMISSIONS           |  3.11 OPERATIONS & GOVERNANCE                             |
+|      +-- REQ-FIN-001 (Agency Service Invoicing)   |      +-- REQ-OPS-001 (Biometric/IP Attendance Clock)      |
+|      +-- REQ-FIN-002 (Foreign Commission Aging)   |      +-- REQ-OPS-002 (Task & Appointment Dispatch)        |
++---------------------------------------------------+-----------------------------------------------------------+
+|  3.12 COMMUNICATION & STUDENT PORTAL                                                                          |
+|      +-- REQ-PORT-001 (Student Tracker Station)    +-- REQ-COMM-001 (Dual-Channel Privacy Firewall)           |
++---------------------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-### 3.1 System Feature: Authentication & Multi-Tenant Branch Management
+### 3.1 System Feature: Agency Onboarding: Sign-Up, OTP Verification & Demo Workspace Request
 
 #### 3.1.1 Description & Priority
-Governs secure authentication, cryptographic session issuance, and multi-branch tenant data isolation.  
+Governs the public entry point for study abroad consultancy agencies, multi-channel contact verification, demo CRM application submission, and the Super Admin review and workspace activation workflow.  
 **Priority:** Must Have (M).
 
 #### 3.1.2 Stimulus / Response Sequences
-- **Stimulus:** Staff user submits email and password from the login interface.
-- **Response:** System validates credentials, verifies branch assignment, issues a signed JWT containing assigned roles and permissions, and routes user to their designated branch view.
+- **Stimulus:** Agency representative navigates to the public signup page, inputs Organization Name, Admin Name, Email, Phone, and Password, and clicks "Create Account".
+- **Response:** System validates input uniqueness, registers pending agency account, dispatches a 6-digit verification code to the email/phone, and renders the OTP verification view.
+- **Stimulus:** Agency representative inputs the 6-digit OTP code.
+- **Response:** System validates OTP; marks email/phone as verified; routes user to the "Request Demo CRM Workspace" form.
+- **Stimulus:** Agency submits the Demo Request form specifying operational scope (e.g., branches: Dhaka & Tangail, estimated annual student intake: 200, message).
+- **Response:** System transitions agency status to `PENDING_APPROVAL`, displays confirmation notice, and routes a priority notification to the Platform Super Admin Panel.
+- **Stimulus:** Platform Super Admin opens the "Demo Requests Queue", reviews agency credentials, and clicks "Approve Demo".
+- **Response:** System provisions an isolated agency tenant workspace (`agency_id`), initializes default branches, sets demo trial expiration (e.g., 14 days), generates the Agency Admin credentials, and sends an activation email with login link.
+
+#### 3.1.3 Functional Requirements
+- **REQ-AGY-001:** The system SHALL provide a public Agency Registration interface capturing: `Organization Name`, `Agency Admin Full Name`, `Work Email Address`, `Phone / WhatsApp Number`, and `Password` (with confirmation).
+- **REQ-AGY-002:** The system SHALL generate an automated 6-digit numeric verification OTP with a 5-minute Time-To-Live (TTL) upon agency signup and deliver it via transactional SMS/Email.
+- **REQ-AGY-003:** The system SHALL permit only verified accounts to submit a Demo Workspace Request, capturing operational details: `Estimated Annual Student Volume`, `Primary Destination Countries`, `Planned Branch Count`, and `Consultancy License / Business Notes`.
+- **REQ-AGY-004:** The system SHALL maintain a dedicated Agency Demo Requests Queue within the Platform Super Admin Panel, rendering all pending agencies with submission timestamp, verification status, and contact details.
+- **REQ-AGY-005:** The Platform Super Admin Panel SHALL provide actions for each pending request:
+  1. **Approve Demo:** Provisions a tenant workspace with a configurable trial period (default: 14 days), optional demo sandbox data, and transitions agency status to `DEMO_ACTIVE`.
+  2. **Approve Full Production:** Transitions agency status to `ACTIVE` with permanent subscription parameters.
+  3. **Reject Request:** Rejects request with mandatory explanation notes and transmits a formal rejection notification.
+- **REQ-AGY-006:** Upon approval by the Platform Super Admin, the system SHALL immediately dispatch an activation confirmation containing the agency's dedicated workspace URL and grant the Agency Admin access to the **Agency Admin Panel**.
+
+---
+
+### 3.2 System Feature: Authentication & Multi-Tenant Branch Management
+
+#### 3.2.1 Description & Priority
+Governs secure authentication, cryptographic session issuance, and branch tenant data isolation within an approved agency workspace.  
+**Priority:** Must Have (M).
+
+#### 3.2.2 Stimulus / Response Sequences
+- **Stimulus:** Staff user submits email and password from the agency login interface.
+- **Response:** System validates credentials, verifies active agency subscription/demo status, issues signed JWT containing `agency_id`, `branch_id`, and roles, and routes user to their workspace.
 - **Stimulus:** User enters an invalid password 5 consecutive times.
 - **Response:** System locks user account for 15 minutes and writes an alert record to `security_audit_logs`.
 
-#### 3.1.3 Functional Requirements
+#### 3.2.3 Functional Requirements
 - **REQ-AUTH-001:** The system SHALL authenticate users using email and cryptographically hashed passwords (`bcrypt`, work factor $\ge 12$).
-- **REQ-AUTH-002:** The system SHALL enforce Multi-Factor Authentication (MFA) via a 6-digit Time-based One-Time Password (TOTP) or SMS/Email verification for all staff accounts holding financial, administrative, or managerial privileges.
-- **REQ-AUTH-003:** The system SHALL inject the authenticated user's active `branch_id`, `role_ids`, and permission dictionary directly into the backend session context to enforce operational tenancy.
+- **REQ-AUTH-002:** The system SHALL enforce Multi-Factor Authentication (MFA) via a 6-digit TOTP or SMS verification for all staff holding administrative or financial privileges.
+- **REQ-AUTH-003:** The system SHALL inject `agency_id`, `branch_id`, `role_ids`, and permission arrays into the backend session context to enforce multi-tenant operational boundaries.
 - **REQ-AUTH-004:** The system SHALL automatically invalidate web sessions after 30 minutes of continuous user inactivity.
 
 ---
 
-### 3.2 System Feature: Dynamic Custom Role & Granular Permission Engine (RBAC)
-
-#### 3.2.1 Description & Priority
-Enables executive management to create, name, configure, and assign custom roles with fine-grained action permissions and 3-tier data scoping modifiers without altering underlying codebase.  
-**Priority:** Must Have (M).
-
-#### 3.2.2 Stimulus / Response Sequences
-- **Stimulus:** Super Admin submits a new role creation request named *"Tangail Senior Counselor"* with `leads.view` (Scope: `BRANCH`) and `apps.create` (Scope: `OWN`).
-- **Response:** System validates uniqueness, persists role record to `roles`, inserts mappings to `role_permissions`, and immediately enables this role in the employee assignment dropdown.
-- **Stimulus:** A user assigned to *"Tangail Senior Counselor"* attempts to query an API endpoint retrieving Dhaka branch leads (`GET /api/leads?branch=dhaka`).
-- **Response:** Backend authorization middleware intercepts the request, evaluates the branch context, and returns an HTTP 403 Forbidden payload.
-
-#### 3.2.3 Functional Requirements
-- **REQ-RBAC-001:** The system SHALL maintain immutable System Roles (`Super Admin`, `Student Portal User`) that cannot be deleted, renamed, or stripped of core permissions.
-- **REQ-RBAC-002:** The system SHALL provide a Dynamic Role Builder interface allowing authorized managers to input a custom `Role Name`, `Description`, and assign granular permission items.
-- **REQ-RBAC-003:** Every permission entry assigned to a custom role SHALL incorporate one of three mutually exclusive Data Scope modifiers:
-  1. `OWN`: Restricts data access strictly to records where `assigned_to == user.id`.
-  2. `BRANCH`: Restricts data access to records matching the user's assigned branch (`record.branch_id == user.branch_id`).
-  3. `GLOBAL`: Grants organization-wide access across all branches.
-- **REQ-RBAC-004:** The system SHALL enforce an Anti-Privilege Escalation rule: No user SHALL be capable of creating or editing a role that contains permissions or scopes exceeding the user's own current access rights.
-- **REQ-RBAC-005:** The system SHALL restrict the assignment of `finance.view_commissions` and `rbac.manage_roles` exclusively to users holding the `Super Admin` role.
-- **REQ-RBAC-006:** The system SHALL prevent the deletion of any role if one or more active employees remain assigned to it.
-- **REQ-RBAC-007:** When a user is assigned multiple roles, the system authorization layer SHALL compute the mathematical union of all granted permissions, resolving scope conflicts in favor of the highest scope (`GLOBAL` > `BRANCH` > `OWN`).
-
----
-
-### 3.3 System Feature: Lead Capture, Deduping & Pipeline Engine
+### 3.3 System Feature: Dynamic Custom Role & Granular Permission Engine (RBAC)
 
 #### 3.3.1 Description & Priority
-Captures prospective student inquiries across all intake channels, normalizes contact identifiers, detects duplicates, and presents an interactive Kanban pipeline.  
+Enables Agency Admins to create, name, configure, and assign custom roles with fine-grained action permissions and 3-tier data scoping modifiers (`OWN`, `BRANCH`, `GLOBAL`).  
 **Priority:** Must Have (M).
 
 #### 3.3.2 Stimulus / Response Sequences
-- **Stimulus:** Web form webhook or counselor creates a new lead with phone `01732423242`.
-- **Response:** System normalizes number to `+8801732423242`, queries database for collisions, creates record `ST-1024`, assigns initial stage `New Enquiry`, and alerts intake officer.
-- **Stimulus:** Counselor inputs an identical phone or email matching an existing lead or student.
-- **Response:** System displays collision alert modal, shows link to existing dossier, and appends the new inquiry source to the existing record's timeline without creating a duplicate.
+- **Stimulus:** Agency Admin creates a custom role named *"Tangail Senior Counselor"* with `leads.view` (Scope: `BRANCH`) and `apps.create` (Scope: `OWN`).
+- **Response:** System validates uniqueness within the agency, persists to `roles`, inserts mappings to `role_permissions`, and enables this role for branch staff assignment.
+- **Stimulus:** Staff assigned to *"Tangail Senior Counselor"* attempts to query an API endpoint retrieving Dhaka branch leads (`GET /api/leads?branch=dhaka`).
+- **Response:** Backend authorization middleware intercepts the request, evaluates the branch context, and returns an HTTP 403 Forbidden payload.
 
 #### 3.3.3 Functional Requirements
+- **REQ-RBAC-001:** The system SHALL maintain immutable System Roles (`Super Admin`, `Agency Admin`, `Student Portal User`) that cannot be deleted or stripped of fundamental access.
+- **REQ-RBAC-002:** The system SHALL provide a Dynamic Role Builder interface in the Agency Admin Panel allowing managers to define custom role names, descriptions, and assign granular permissions.
+- **REQ-RBAC-003:** Every permission assigned to a role SHALL incorporate one of three mutually exclusive Data Scope modifiers:
+  1. `OWN`: Access restricted strictly to records where `assigned_to == user.id`.
+  2. `BRANCH`: Access restricted to records matching the user's assigned branch (`record.branch_id == user.branch_id`).
+  3. `GLOBAL`: Grants agency-wide access across all branches of that agency.
+- **REQ-RBAC-004:** The system SHALL enforce an Anti-Privilege Escalation rule: No staff member SHALL create or modify a role to include permissions or data scopes exceeding their own access profile.
+- **REQ-RBAC-005:** Access to `finance.view_commissions` and `rbac.manage_roles` SHALL be restricted exclusively to Agency Admins and designated senior executives.
+- **REQ-RBAC-006:** The system SHALL block the deletion of any custom role while active staff members remain assigned to it.
+- **REQ-RBAC-007:** When a staff user holds multiple roles, the authorization engine SHALL compute the union of granted permissions, resolving scope conflicts in favor of the highest scope (`GLOBAL` > `BRANCH` > `OWN`).
+
+---
+
+### 3.4 System Feature: Lead Capture, Deduping & Pipeline Engine
+
+#### 3.4.1 Description & Priority
+Captures prospective student inquiries, normalizes contact identifiers, detects duplicates, and presents an interactive Kanban pipeline.  
+**Priority:** Must Have (M).
+
+#### 3.4.2 Stimulus / Response Sequences
+- **Stimulus:** Web form webhook or counselor creates a new lead with phone `01732423242`.
+- **Response:** System normalizes number to `+8801732423242`, queries database for collisions within the agency, creates record `ST-1024`, and sets stage to `New Enquiry`.
+- **Stimulus:** Counselor inputs a phone or email matching an existing lead or student in the agency.
+- **Response:** System displays collision alert modal, shows link to existing dossier, and appends the new inquiry source to the existing record's timeline without duplicating the row.
+
+#### 3.4.3 Functional Requirements
 - **REQ-LEAD-001:** The system SHALL ingest leads containing mandatory fields: `Full Name`, `Contact Phone`, `Branch`, `Target Destination`, and `Source Channel`.
 - **REQ-LEAD-002:** The system SHALL execute algorithmic deduplication on every lead creation attempt:
   - Phone numbers SHALL be normalized to E.164 international standard.
   - Emails SHALL be trimmed and normalized to lowercase.
-  - If a collision occurs against an existing `lead` or `student`, creation SHALL be rejected, and the existing file's activity feed SHALL be appended.
+  - Collisions against existing records SHALL be rejected from new creation and appended to the existing timeline.
 - **REQ-LEAD-003:** The system SHALL support capturing an Academic Credentials Matrix for every lead:
   - Prior Exams: SSC/O-Level, HSC/A-Level/Diploma, Bachelor, Master's.
   - Academic metadata: Passing Year, Board/University, Result/CGPA, Scale.
@@ -338,19 +355,19 @@ Captures prospective student inquiries across all intake channels, normalizes co
 
 ---
 
-### 3.4 System Feature: Student Dossier & 360° Case Management
+### 3.5 System Feature: Student Dossier & 360° Case Management
 
-#### 3.4.1 Description & Priority
-Serves as the single source of truth for an enrolled student applicant, binding academic history, passport identity, applications, documents, payments, and case notes.  
+#### 3.5.1 Description & Priority
+Centralized master dossier binding academic history, passport identity, multi-applications, documents, payments, and case notes into a single source of truth.  
 **Priority:** Must Have (M).
 
-#### 3.4.2 Stimulus / Response Sequences
+#### 3.5.2 Stimulus / Response Sequences
 - **Stimulus:** Counselor drags a lead card into `File Opening`.
-- **Response:** System verifies all mandatory conversion fields (`BR-02.1`), generates permanent identifier `STU-26DHK-0248`, initializes empty document checklist, and creates master dossier.
+- **Response:** System verifies all mandatory conversion fields (`BR-02`), generates permanent identifier `STU-26DHK-0248`, initializes document checklist, and creates master dossier.
 - **Stimulus:** Counselor clicks "Export PDF Dossier".
 - **Response:** System compiles personal details, academic history, test scores, application states, and verified document summaries into a branded PDF document.
 
-#### 3.4.3 Functional Requirements
+#### 3.5.3 Functional Requirements
 - **REQ-STU-001:** The system SHALL issue a permanent, unique student identification number upon file opening matching format: `STU-[YY][BRANCH_CODE]-[0-9]{4}` (e.g., `STU-26DHK-0248`).
 - **REQ-STU-002:** The system SHALL block conversion of a lead into a student unless the following fields are completed: Legal Full Name, Verified Email, WhatsApp Phone, Prior Academic Qualification with GPA/Result, Target Country, Target Intake, and Declared Budget.
 - **REQ-STU-003:** The Student Master Dossier SHALL provide 5 synchronized operational tabs:
@@ -363,19 +380,19 @@ Serves as the single source of truth for an enrolled student applicant, binding 
 
 ---
 
-### 3.5 System Feature: Multi-Application Lifecycle Tracking
+### 3.6 System Feature: Multi-Application Lifecycle Tracking
 
-#### 3.5.1 Description & Priority
+#### 3.6.1 Description & Priority
 Tracks multiple simultaneous university submissions per student across different institutions, terms, and destinations with strict state progression rules.  
 **Priority:** Must Have (M).
 
-#### 3.5.2 Stimulus / Response Sequences
+#### 3.6.2 Stimulus / Response Sequences
 - **Stimulus:** Admissions Officer creates an application for Harbour University for Master of Business, February 2027 intake.
 - **Response:** System generates application code `APP-2401`, binds it to the student record, and sets initial status to `Draft`.
 - **Stimulus:** Counselor attempts to lodge application to university while Bachelor transcript is marked `Needs Correction`.
 - **Response:** System blocks status progression and renders an alert: *"Cannot transition to Submitted: Mandatory academic documents are not verified."*
 
-#### 3.5.3 Functional Requirements
+#### 3.6.3 Functional Requirements
 - **REQ-APP-001:** The system SHALL support creating $N$ independent university application records (`APP-XXXX`) under a single student master record.
 - **REQ-APP-002:** Each application record SHALL capture: `Target Institution`, `Program Title`, `Study Level`, `Intake Month & Year`, `Application Fee & Currency`, `Current Stage`, and `Action Due Date`.
 - **REQ-APP-003:** The system SHALL enforce an automated sequential state machine:
@@ -388,19 +405,19 @@ Tracks multiple simultaneous university submissions per student across different
 
 ---
 
-### 3.6 System Feature: Document Review, Versioning & Quality Assurance
+### 3.7 System Feature: Document Review, Versioning & Quality Assurance
 
-#### 3.6.1 Description & Priority
+#### 3.7.1 Description & Priority
 Manages the uploading, screening, version archiving, and verification of student identity, academic, language, and financial records.  
 **Priority:** Must Have (M).
 
-#### 3.6.2 Stimulus / Response Sequences
+#### 3.7.2 Stimulus / Response Sequences
 - **Stimulus:** Student uploads replacement file for Bachelor Transcript via the student portal.
 - **Response:** System archives existing file as `v1`, marks replacement as `v2`, sets review status to `In Review`, and notifies the assigned admissions officer.
 - **Stimulus:** Admissions officer marks a document as `Needs Correction` with note: *"Missing final semester grade sheet."*
 - **Response:** System flags document badge as orange (`Needs Correction`), updates timestamp, and displays an alert banner on the student portal.
 
-#### 3.6.3 Functional Requirements
+#### 3.7.3 Functional Requirements
 - **REQ-DOC-001:** The system SHALL categorize all documents under: `Identity`, `Academic`, `Language`, `Financial`, and `Visa Case Evidence`.
 - **REQ-DOC-002:** The system SHALL enforce an immutable version control tree (`v1`, `v2`, `v3`, etc.) for every document slot. Prior versions SHALL remain accessible to authorized staff for audit purposes.
 - **REQ-DOC-003:** The system SHALL support 4 distinct review statuses: `Missing`, `In Review`, `Needs Correction`, and `Verified`.
@@ -411,19 +428,19 @@ Manages the uploading, screening, version archiving, and verification of student
 
 ---
 
-### 3.7 System Feature: Visa Processing & Compliance Management
+### 3.8 System Feature: Visa Processing & Compliance Management
 
-#### 3.7.1 Description & Priority
+#### 3.8.1 Description & Priority
 Governs post-admission visa file compilation, financial solvency screening, biometrics tracking, and embassy decision recording.  
 **Priority:** Must Have (M).
 
-#### 3.7.2 Stimulus / Response Sequences
+#### 3.8.2 Stimulus / Response Sequences
 - **Stimulus:** Application stage updates to `Deposit Pending` with tuition receipt confirmed.
 - **Response:** System unlocks the `Visa Cases` module for the student, initializes destination-specific compliance checklist, and assigns a Visa Processing Officer.
 - **Stimulus:** Visa officer marks case as `Visa Granted` with embassy reference number.
 - **Response:** System updates student case tag to `Enrolled / Visa Granted`, issues an arrival task checklist, and triggers expected commission calculation in Finance.
 
-#### 3.7.3 Functional Requirements
+#### 3.8.3 Functional Requirements
 - **REQ-VISA-001:** The system SHALL initialize a Visa Case record only after an application achieves `Conditional Offer` (with conditions met) or `Unconditional Offer` and records verified tuition deposit payment.
 - **REQ-VISA-002:** The system SHALL dynamically render country-specific visa compliance checklists:
   - **Canada:** SDS checklist (GIC verification, upfront medical confirmation, full Year 1 tuition receipt).
@@ -434,20 +451,20 @@ Governs post-admission visa file compilation, financial solvency screening, biom
 
 ---
 
-### 3.8 System Feature: Program Finder, Comparison & Eligibility Engine
+### 3.9 System Feature: Program Finder, Comparison & Eligibility Engine
 
-#### 3.8.1 Description & Priority
+#### 3.9.1 Description & Priority
 Provides a searchable institution and course catalogue featuring multi-criteria filtering, side-by-side program comparison, and automated student academic fit evaluation.  
 **Priority:** Should Have (S).
 
-#### 3.8.2 Stimulus / Response Sequences
+#### 3.9.2 Stimulus / Response Sequences
 - **Stimulus:** Counselor filters catalogue by Destination: `Australia`, Intake: `February 2027`, Level: `Postgraduate`, Max Budget: `35000 AUD`.
 - **Response:** System renders matching course cards displaying institution, annual fee, IELTS/PTE criteria, and intake status.
 - **Stimulus:** Counselor clicks "Check Eligibility" for student Ayesha Rahman against Harbour University Master of Business.
 - **Response:** System computes student GPA and IELTS bands against course rules and displays an interactive match/deficit table.
 
-#### 3.8.3 Functional Requirements
-- **REQ-PROG-001:** The system SHALL provide a multi-facet search engine filtering by: `Destination Country`, `Region/State`, `Program Level`, `Field of Study`, `Intake Term & Year`, `Annual Tuition Budget`, and `Tuition Currency`.
+#### 3.9.3 Functional Requirements
+- **REQ-PROG-001:** The system SHALL provide a multi-facet search engine filtering by: `Destination Country`, `Region/State`, `Program Level`, `Field of Study`, `Intake Month & Year`, `Annual Tuition Budget`, and `Tuition Currency`.
 - **REQ-PROG-002:** The system SHALL support specialized admission boolean filter flags: `Scholarship Available`, `Application Fee Waiver Route`, `Open for Applications`, `STEM Designated`, `ESL/Pathway Included`, `No GRE Required`, `No Maths Prerequisite`, `Medium of Instruction (MOI) English Waiver`, `15-Year Education Accepted`.
 - **REQ-PROG-003:** The system SHALL support selecting up to three (3) programs simultaneously and rendering a side-by-side comparative matrix.
 - **REQ-PROG-004:** The system SHALL execute an automated Eligibility Fit Algorithm comparing active student profile attributes against program requirements:
@@ -459,19 +476,19 @@ Provides a searchable institution and course catalogue featuring multi-criteria 
 
 ---
 
-### 3.9 System Feature: Accounts, Service Invoicing & Commission Ledger
+### 3.10 System Feature: Accounts, Service Invoicing & Commission Ledger
 
-#### 3.9.1 Description & Priority
+#### 3.10.1 Description & Priority
 Administers agency service fee billing, MFS payment recording, partner institution commission aging, and branch office expense auditing.  
 **Priority:** Must Have (M).
 
-#### 3.9.2 Stimulus / Response Sequences
+#### 3.10.2 Stimulus / Response Sequences
 - **Stimulus:** Finance officer generates an invoice for student Ayesha Rahman for Application Support Service in the amount of BDT 5,000.
 - **Response:** System issues invoice `ST-INV-026`, updates student financial balance, and reflects invoice on student portal.
 - **Stimulus:** Student pays invoice via simulated/integrated mobile banking (bKash).
 - **Response:** System records payment, transitions invoice to `Paid`, and issues PDF receipt `ST-RCP-026`.
 
-#### 3.9.3 Functional Requirements
+#### 3.10.3 Functional Requirements
 - **REQ-FIN-001:** The system SHALL maintain strict ledger isolation: Agency service fee transactions SHALL be maintained exclusively in local currency (BDT); University tuition deposits and institutional commissions SHALL be recorded in their respective foreign currencies (AUD, CAD, GBP, EUR, USD).
 - **REQ-FIN-002:** The system SHALL generate agency service invoices with automated numbering (`ST-INV-[0-9]{4}`) tracking status: `Unpaid`, `Partially Paid`, `Paid`, `Cancelled`.
 - **REQ-FIN-003:** The system SHALL issue formal payment receipts (`ST-RCP-[0-9]{4}`) upon recording payment confirmation via Mobile Banking (bKash/Nagad), Bank Wire, or Cash.
@@ -482,19 +499,19 @@ Administers agency service fee billing, MFS payment recording, partner instituti
 
 ---
 
-### 3.10 System Feature: Operations: Employee Attendance, Tasks & Appointments
+### 3.11 System Feature: Operations: Employee Attendance, Tasks & Appointments
 
-#### 3.10.1 Description & Priority
+#### 3.11.1 Description & Priority
 Coordinates daily staff presence, inter-branch task delegation, counseling appointment scheduling, and case reassignments.  
 **Priority:** Should Have (S).
 
-#### 3.10.2 Stimulus / Response Sequences
+#### 3.11.2 Stimulus / Response Sequences
 - **Stimulus:** Counselor clicks "Check In" upon arriving at the Dhaka office.
 - **Response:** System records timestamp, client IP, and marks staff member as `Present` on the branch attendance board.
 - **Stimulus:** Branch manager assigns a task: *"Verify bank statement for STU-0248"* with due date 21 September.
 - **Response:** System dispatches task to counselor's task queue and schedules automated reminder 24 hours prior to deadline.
 
-#### 3.10.3 Functional Requirements
+#### 3.11.3 Functional Requirements
 - **REQ-OPS-001:** The system SHALL provide staff check-in and check-out attendance logging, recording exact server timestamp and client network IP address.
 - **REQ-OPS-002:** The system SHALL provide a task management engine allowing supervisors to assign tasks linked to specific student files with due dates and priority tiers (`Urgent`, `Normal`, `Low`).
 - **REQ-OPS-003:** If an assigned task reaches its deadline without being marked `Completed`, the system SHALL escalate the task tag to `Overdue` and trigger an alert to the Branch Manager.
@@ -503,19 +520,19 @@ Coordinates daily staff presence, inter-branch task delegation, counseling appoi
 
 ---
 
-### 3.11 System Feature: Communication Firewall & Student Self-Service Portal
+### 3.12 System Feature: Communication Firewall & Student Self-Service Portal
 
-#### 3.11.1 Description & Priority
+#### 3.12.1 Description & Priority
 Delivers a dedicated external portal for applicants while enforcing a strict data privacy firewall between internal staff notes and student-visible notices.  
 **Priority:** Must Have (M).
 
-#### 3.11.2 Stimulus / Response Sequences
+#### 3.12.2 Stimulus / Response Sequences
 - **Stimulus:** Counselor logs an internal assessment note: *"Student sponsor bank statement appears questionable; verify with tax documents."*
 - **Response:** System saves note to internal case history; verifies privacy flag; ensures note is strictly excluded from student portal APIs.
 - **Stimulus:** Counselor creates a student message: *"Please upload the missing final page of your transcript."*
 - **Response:** System transmits message to the student portal and dispatches an automated notification alert.
 
-#### 3.11.3 Functional Requirements
+#### 3.12.3 Functional Requirements
 - **REQ-COMM-001:** The system SHALL enforce an architectural Data Privacy Firewall:
   - `Internal Notes`: Accessible only to authenticated agency personnel holding appropriate permissions.
   - `Student-Visible Messages`: Transparent updates, document remediation requests, and milestone notices displayed on the student portal.
@@ -588,6 +605,7 @@ No dedicated hardware interfaces required. The platform operates on standard com
 | **BR-05** | Financial Isolation | Agency fee invoices (BDT) and University Tuition/Commissions (foreign currency) SHALL be stored in separate ledger tables. Forecast commission is never recognized as collected revenue. |
 | **BR-06** | Commission Privacy | Institutional commission rates, university agreements, and profit margins SHALL NEVER be exposed to Counselor, Student, or public API views. |
 | **BR-07** | Custom Role Integrity | System roles cannot be deleted. Custom roles cannot grant permissions exceeding the creator's permissions. Active assigned roles cannot be deleted. |
+| **BR-08** | Agency Onboarding & Demo Lifecycle | An agency cannot access an Agency Admin Panel until its phone/email is verified via OTP and its Demo/Production request is formally approved by a Platform Super Admin. Demo workspaces automatically lock upon reaching trial expiration. |
 
 ---
 
@@ -597,9 +615,15 @@ No dedicated hardware interfaces required. The platform operates on standard com
 
 ```mermaid
 erDiagram
-    BRANCH ||--o{ USER : employs
-    BRANCH ||--o{ LEAD : receives
-    BRANCH ||--o{ EXPENSE : records
+    AGENCY ||--o{ BRANCH : owns
+    AGENCY ||--o{ USER : employs
+    AGENCY ||--o{ ROLE : configures
+    AGENCY ||--o{ LEAD : receives
+    AGENCY ||--o{ STUDENT : manages
+    AGENCY ||--o{ INVOICE : bills
+    AGENCY ||--o{ COMMISSION : tracks
+    BRANCH ||--o{ USER : houses
+    BRANCH ||--o{ EXPENSE : incurs
     USER ||--o{ USER_ROLE : holds
     ROLE ||--o{ USER_ROLE : assigned_to
     ROLE ||--o{ ROLE_PERMISSION : defines
@@ -623,17 +647,54 @@ erDiagram
 
 ```sql
 -- ============================================================================
+-- 0. PLATFORM LEVEL: AGENCIES & DEMO WORKSPACE ONBOARDING
+-- ============================================================================
+CREATE TABLE agencies (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL, -- e.g., 'study-track'
+    admin_name VARCHAR(100) NOT NULL,
+    admin_email VARCHAR(120) UNIQUE NOT NULL,
+    admin_phone VARCHAR(30) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    is_phone_verified BOOLEAN DEFAULT FALSE,
+    is_email_verified BOOLEAN DEFAULT FALSE,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING_APPROVAL', 
+    -- PENDING_APPROVAL, DEMO_ACTIVE, ACTIVE, REJECTED, SUSPENDED, EXPIRED
+    demo_duration_days INT DEFAULT 14,
+    demo_expires_at TIMESTAMP WITH TIME ZONE,
+    approved_by_user_id INT, -- Platform Super Admin ID
+    approved_at TIMESTAMP WITH TIME ZONE,
+    rejection_reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE agency_demo_requests (
+    id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+    planned_branches INT DEFAULT 1,
+    estimated_annual_students INT DEFAULT 50,
+    target_destinations TEXT, -- e.g., 'Canada, Australia, UK'
+    business_license_no VARCHAR(100),
+    notes TEXT,
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================================
 -- 1. BRANCHES & MULTI-TENANCY
 -- ============================================================================
 CREATE TABLE branches (
     id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
-    code VARCHAR(10) UNIQUE NOT NULL, -- e.g., 'DHK', 'TGL'
+    code VARCHAR(10) NOT NULL, -- e.g., 'DHK', 'TGL'
     address TEXT NOT NULL,
     phone VARCHAR(30) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (agency_id, code)
 );
 
 -- ============================================================================
@@ -641,16 +702,19 @@ CREATE TABLE branches (
 -- ============================================================================
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    branch_id INT NOT NULL REFERENCES branches(id) ON DELETE RESTRICT,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+    branch_id INT REFERENCES branches(id) ON DELETE RESTRICT,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(120) UNIQUE NOT NULL,
+    email VARCHAR(120) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     phone VARCHAR(30),
+    is_agency_admin BOOLEAN DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
     failed_login_attempts INT DEFAULT 0,
     locked_until TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (agency_id, email)
 );
 
 -- ============================================================================
@@ -658,14 +722,16 @@ CREATE TABLE users (
 -- ============================================================================
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
-    slug VARCHAR(100) UNIQUE NOT NULL,
+    slug VARCHAR(100) NOT NULL,
     description TEXT,
     is_system BOOLEAN DEFAULT FALSE,
-    branch_id INT REFERENCES branches(id) ON DELETE SET NULL, -- NULL = Global Role
+    branch_id INT REFERENCES branches(id) ON DELETE SET NULL, -- NULL = Global Agency Role
     created_by INT REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (agency_id, slug)
 );
 
 CREATE TABLE permissions (
@@ -696,7 +762,8 @@ CREATE TABLE user_roles (
 -- ============================================================================
 CREATE TABLE leads (
     id SERIAL PRIMARY KEY,
-    lead_code VARCHAR(30) UNIQUE NOT NULL, -- e.g., 'ST-0324324'
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+    lead_code VARCHAR(30) NOT NULL, -- e.g., 'ST-0324324'
     branch_id INT NOT NULL REFERENCES branches(id) ON DELETE RESTRICT,
     assigned_to INT REFERENCES users(id) ON DELETE SET NULL,
     name VARCHAR(100) NOT NULL,
@@ -709,7 +776,8 @@ CREATE TABLE leads (
     stage VARCHAR(30) NOT NULL DEFAULT 'New Enquiry',
     source VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (agency_id, lead_code)
 );
 
 -- ============================================================================
@@ -717,7 +785,8 @@ CREATE TABLE leads (
 -- ============================================================================
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
-    student_code VARCHAR(30) UNIQUE NOT NULL, -- e.g., 'STU-26DHK-0248'
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+    student_code VARCHAR(30) NOT NULL, -- e.g., 'STU-26DHK-0248'
     lead_id INT UNIQUE REFERENCES leads(id) ON DELETE RESTRICT,
     branch_id INT NOT NULL REFERENCES branches(id) ON DELETE RESTRICT,
     counselor_id INT REFERENCES users(id) ON DELETE SET NULL,
@@ -730,7 +799,8 @@ CREATE TABLE students (
     passport_country VARCHAR(50) DEFAULT 'Bangladesh',
     status VARCHAR(30) DEFAULT 'Active',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (agency_id, student_code)
 );
 
 CREATE TABLE academic_records (
@@ -762,10 +832,11 @@ CREATE TABLE language_tests (
 -- ============================================================================
 CREATE TABLE institutions (
     id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
     name VARCHAR(150) NOT NULL,
     country VARCHAR(50) NOT NULL,
     region VARCHAR(100),
-    commission_rate_percent NUMERIC(5,2) DEFAULT 15.00, -- Confidentially locked
+    commission_rate_percent NUMERIC(5,2) DEFAULT 15.00,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -773,8 +844,8 @@ CREATE TABLE programs (
     id SERIAL PRIMARY KEY,
     institution_id INT NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
     name VARCHAR(150) NOT NULL,
-    degree_level VARCHAR(50) NOT NULL, -- Undergraduate, Postgraduate
-    study_area VARCHAR(100) NOT NULL,  -- Business, Computing, Engineering
+    degree_level VARCHAR(50) NOT NULL,
+    study_area VARCHAR(100) NOT NULL,
     intake_month VARCHAR(20) NOT NULL,
     intake_year VARCHAR(10) NOT NULL,
     duration VARCHAR(30) NOT NULL,
@@ -800,7 +871,7 @@ CREATE TABLE applications (
     stage VARCHAR(50) NOT NULL DEFAULT 'Draft',
     action_item VARCHAR(255),
     action_due_date DATE,
-    offer_type VARCHAR(50), -- Conditional, Unconditional
+    offer_type VARCHAR(50),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -813,10 +884,10 @@ CREATE TABLE documents (
     student_id INT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     app_id INT REFERENCES applications(id) ON DELETE SET NULL,
     name VARCHAR(150) NOT NULL,
-    category VARCHAR(50) NOT NULL, -- Identity, Academic, Language, Financial, Visa
+    category VARCHAR(50) NOT NULL,
     storage_path TEXT NOT NULL,
     version INT NOT NULL DEFAULT 1,
-    status VARCHAR(30) NOT NULL DEFAULT 'In Review', -- Missing, In Review, Needs Correction, Verified
+    status VARCHAR(30) NOT NULL DEFAULT 'In Review',
     reviewer_notes TEXT,
     verified_by INT REFERENCES users(id) ON DELETE SET NULL,
     verified_at TIMESTAMP WITH TIME ZONE,
@@ -838,7 +909,7 @@ CREATE TABLE visa_cases (
     lodged_date DATE,
     biometrics_date DATE,
     decision_date DATE,
-    outcome VARCHAR(30) DEFAULT 'Pending', -- Pending, Granted, Refused
+    outcome VARCHAR(30) DEFAULT 'Pending',
     refusal_reason TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -849,36 +920,39 @@ CREATE TABLE visa_cases (
 -- ============================================================================
 CREATE TABLE invoices (
     id SERIAL PRIMARY KEY,
-    invoice_no VARCHAR(50) UNIQUE NOT NULL, -- e.g., 'ST-INV-026'
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+    invoice_no VARCHAR(50) NOT NULL, -- e.g., 'ST-INV-026'
     student_id INT NOT NULL REFERENCES students(id) ON DELETE RESTRICT,
     branch_id INT NOT NULL REFERENCES branches(id) ON DELETE RESTRICT,
     description VARCHAR(255) NOT NULL,
     amount NUMERIC(12,2) NOT NULL,
     currency VARCHAR(10) NOT NULL DEFAULT 'BDT',
-    status VARCHAR(30) NOT NULL DEFAULT 'Unpaid', -- Unpaid, Paid, Cancelled
+    status VARCHAR(30) NOT NULL DEFAULT 'Unpaid',
     created_by INT REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (agency_id, invoice_no)
 );
 
 CREATE TABLE receipts (
     id SERIAL PRIMARY KEY,
-    receipt_no VARCHAR(50) UNIQUE NOT NULL, -- e.g., 'ST-RCP-026'
+    receipt_no VARCHAR(50) UNIQUE NOT NULL,
     invoice_id INT UNIQUE NOT NULL REFERENCES invoices(id) ON DELETE RESTRICT,
     amount_paid NUMERIC(12,2) NOT NULL,
     currency VARCHAR(10) NOT NULL DEFAULT 'BDT',
-    payment_method VARCHAR(50) NOT NULL, -- bKash, Nagad, Bank Wire, POS
+    payment_method VARCHAR(50) NOT NULL,
     received_by INT REFERENCES users(id) ON DELETE SET NULL,
     received_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE commissions (
     id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
     app_id INT UNIQUE NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     institution_id INT NOT NULL REFERENCES institutions(id) ON DELETE RESTRICT,
     forecast_amount NUMERIC(12,2) NOT NULL,
     currency VARCHAR(10) NOT NULL,
-    status VARCHAR(30) NOT NULL DEFAULT 'Forecast', -- Forecast, Invoiced, Received
+    status VARCHAR(30) NOT NULL DEFAULT 'Forecast',
     bank_advice_reference VARCHAR(100),
     received_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -886,11 +960,12 @@ CREATE TABLE commissions (
 
 CREATE TABLE office_expenses (
     id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
     branch_id INT NOT NULL REFERENCES branches(id) ON DELETE RESTRICT,
     description VARCHAR(255) NOT NULL,
     amount NUMERIC(12,2) NOT NULL,
     currency VARCHAR(10) NOT NULL DEFAULT 'BDT',
-    status VARCHAR(30) NOT NULL DEFAULT 'Pending', -- Pending, Approved, Rejected
+    status VARCHAR(30) NOT NULL DEFAULT 'Pending',
     submitted_by INT NOT NULL REFERENCES users(id),
     approved_by INT REFERENCES users(id),
     receipt_storage_path TEXT,
@@ -902,6 +977,7 @@ CREATE TABLE office_expenses (
 -- ============================================================================
 CREATE TABLE attendance (
     id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     branch_id INT NOT NULL REFERENCES branches(id) ON DELETE RESTRICT,
     check_in TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -911,6 +987,7 @@ CREATE TABLE attendance (
 
 CREATE TABLE security_audit_logs (
     id BIGSERIAL PRIMARY KEY,
+    agency_id INT REFERENCES agencies(id) ON DELETE CASCADE,
     acting_user_id INT REFERENCES users(id) ON DELETE SET NULL,
     client_ip VARCHAR(45) NOT NULL,
     event_type VARCHAR(100) NOT NULL,
@@ -930,7 +1007,12 @@ CREATE TABLE security_audit_logs (
 
 | Requirement ID | System Feature | Design Element / DDL Table | Acceptance Test Case |
 | :--- | :--- | :--- | :--- |
-| `REQ-AUTH-001` | Authentication Engine | `users`, `bcrypt` hashing | `TC-AUTH-001` |
+| `REQ-AGY-001` | Agency Public Registration | `agencies`, `agencies.admin_email` | `TC-AGY-001` |
+| `REQ-AGY-002` | Agency OTP Verification | `agencies.is_phone_verified` | `TC-AGY-001` |
+| `REQ-AGY-003` | Demo Request Submission | `agency_demo_requests` | `TC-AGY-001` |
+| `REQ-AGY-004` | Super Admin Approval Queue | `agencies.status`, Super Admin Panel| `TC-AGY-001` |
+| `REQ-AGY-006` | Agency Admin Panel Access | `users.is_agency_admin`, JWT Session| `TC-AGY-001` |
+| `REQ-AUTH-001` | Staff Authentication | `users`, `bcrypt` hashing | `TC-AUTH-001` |
 | `REQ-AUTH-003` | Branch Multi-Tenancy | `branches`, `users.branch_id` | `TC-TENANT-001` |
 | `REQ-RBAC-002` | Custom Role Builder | `roles`, `role_permissions` | `TC-RBAC-001` |
 | `REQ-RBAC-003` | 3-Tier Data Scoping | `role_permissions.data_scope` | `TC-RBAC-002` |
@@ -954,17 +1036,31 @@ CREATE TABLE security_audit_logs (
 
 ```
                                   ACCEPTANCE TESTING FLOW
-+-----------------------+     +------------------------+     +------------------------+
-| 1. Security & RBAC    |     | 2. Lead & Dossier Gate |     | 3. Processing & Ops    |
-| TC-RBAC-001 (Role DDL)|     | TC-LEAD-002 (Dedup)    |     | TC-APP-002 (Doc Gate)  |
-| TC-RBAC-002 (Scope)   | --> | TC-STU-002 (Conv Gate) | --> | TC-DOC-001 (Version v2)|
-| TC-RBAC-003 (Anti-Esc)|     | TC-APP-001 (Multi-App) |     | TC-FIN-001 (Ledger Sep)|
-+-----------------------+     +------------------------+     +------------------------+
++---------------------------+     +------------------------+     +------------------------+
+| 1. Agency Onboard & Demo  |     | 2. Security & RBAC     |     | 3. Core Case Workflows |
+| TC-AGY-001 (Signup to     |     | TC-RBAC-001 (Role DDL) |     | TC-LEAD-002 (Dedup)    |
+| Super Admin Approval &    | --> | TC-RBAC-002 (Scope)    | --> | TC-STU-002 (Conv Gate) |
+| Agency Admin Workspace)   |     | TC-RBAC-003 (Anti-Esc) |     | TC-APP-002 (Doc Gate)  |
++---------------------------+     +------------------------+     +------------------------+
 ```
+
+#### Test Case ID: `TC-AGY-001`
+- **Feature:** End-to-End Agency Onboarding: Sign-up, OTP Verification, Demo CRM Request, and Super Admin Approval.
+- **Pre-conditions:** Platform Super Admin panel is active. Agency `Study Track International` is unregistered.
+- **Execution Steps:**
+  1. Agency representative visits public signup page, enters Organization Name `"Study Track International"`, Admin Name `"T. H. Talukder"`, Email `"ceo@studytrack.com"`, Phone `"01711000000"`, Password, and submits.
+  2. System receives signup, generates 6-digit OTP, and renders verification screen.
+  3. Agency enters the OTP code.
+  4. Upon verification, agency completes Demo Request form: specifies 2 branches (`Dhaka`, `Tangail`), expected student volume `200`, and submits.
+  5. Platform Super Admin logs into **Platform Super Admin Panel**, navigates to *Agency Demo Requests*, reviews the submission, and clicks *"Approve Demo (14 Days)"*.
+  6. System transitions agency status to `DEMO_ACTIVE`, provisions tenant workspace (`agency_id`), and sends activation email.
+  7. Agency Admin clicks login link, enters credentials, and logs in.
+- **Expected Outcome:** Agency Admin lands in their dedicated **Agency Admin Panel**, sees zero cross-tenant contamination, and can immediately add branches (`Dhaka`, `Tangail`) and invite counselors.
+- **Pass/Fail Criteria:** Pass if registration, verification, Super Admin approval queue, and isolated workspace provisioning succeed with full audit trail.
 
 #### Test Case ID: `TC-RBAC-001`
 - **Feature:** Custom Role Builder and Dynamic Assignment.
-- **Pre-conditions:** Super Admin authenticated.
+- **Pre-conditions:** Agency Admin authenticated in Agency Admin Panel.
 - **Execution Steps:**
   1. Navigate to *Roles & Permissions Management*.
   2. Click *"+ Create Custom Role"*.
@@ -1021,7 +1117,9 @@ CREATE TABLE security_audit_logs (
 
 ### Appendix: Conformance Checklist
 
-- [x] **IEEE 830-1998 Sectional Alignment:** Includes Introduction, Overall Description, System Features, External Interfaces, NFRs, Data Schemas, and Verification Matrix.
+- [x] **Two-Tier SaaS Architecture:** Complete separation between Platform Super Admin Panel (SaaS Provider) and Agency Admin Panel (Tenant Workspace).
+- [x] **Self-Service Agency Onboarding:** Comprehensive workflow covering Registration $\rightarrow$ OTP Contact Verification $\rightarrow$ Demo CRM Request $\rightarrow$ Super Admin Review & Provisioning $\rightarrow$ Agency Admin Panel Handover.
+- [x] **IEEE 830-1998 Sectional Alignment:** Full compliance across Introduction, Overall Description, System Features, External Interfaces, NFRs, Data Schemas, and Verification Matrix.
 - [x] **RFC 2119 Compliance:** Strict application of SHALL, SHALL NOT, and SHOULD modal verbs.
 - [x] **Traceability:** Complete bi-directional mapping from Requirement IDs to Acceptance Tests.
-- [x] **Production DDL:** Fully typed PostgreSQL relational schema with foreign key constraints, indexes, and audit logging tables.
+- [x] **Production DDL:** Fully typed PostgreSQL relational schema with tenant isolation (`agency_id`), foreign key constraints, indexes, and audit logging tables.
