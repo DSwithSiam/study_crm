@@ -331,52 +331,139 @@ Enables Agency Admins to create, name, configure, and assign custom roles with f
 ### 3.4 System Feature: Lead Capture, Deduping & Pipeline Engine
 
 #### 3.4.1 Description & Priority
-Captures prospective student inquiries, normalizes contact identifiers, detects duplicates, and presents an interactive Kanban pipeline.  
+Captures prospective student inquiries, normalizes contact identifiers, detects duplicates, and presents an interactive Kanban pipeline with dedicated creation and conversion modal dialogs.  
 **Priority:** Must Have (M).
 
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                            LEAD PIPELINE WORKSPACE                                            |
+| Search: [ Search leads...       ]      Branch: [ All Branches ▼ ]                     [ + Add New Lead ]      |
++--------------------+--------------------+--------------------+------------------------------------------------+
+| NEW LEAD (12)      | COUNSELING (8)     | INTERESTED (6)     | APPLICATION (4)                                |
++--------------------+--------------------+--------------------+------------------------------------------------+
+| [Avatar] LD-034345 | [Avatar] LD-034346 | [Avatar] LD-034347 | [Avatar] LD-034348                            |
+| Zaire Westervelt   | Emerson Saris      | Sadia Noor         | Ayesha Rahman                                 |
+| Phone: 01732423242 | Phone: 01812345678 | Phone: 01987654321 | Phone: 01711223344                            |
+| Email: z@gmail.com | Email: e@gmail.com | Email: s@gmail.com | Email: a@gmail.com                            |
+| Branch: Dhaka      | Branch: Dhaka      | Branch: Tangail    | Branch: Dhaka                                 |
+| Couns: Sarah Islam | Couns: Sarah Islam | Couns: Rifat       | Couns: Sarah Islam                            |
+| Country: CA-Canada | Country: Australia | Country: Finland   | Country: UK                                   |
+| Prog: MSc Comp Sci | Prog: MBA          | Prog: Int Business | Prog: MSc Data Science                        |
+|                    |                    |                    |                                                |
+| [Move To Counseling| [Move To Interested| [Move To Applicat.]| [ File Opening / Start Application ] (Orange)  |
++--------------------+--------------------+--------------------+------------------------------------------------+
+```
+
 #### 3.4.2 Stimulus / Response Sequences
-- **Stimulus:** Web form webhook or counselor creates a new lead with phone `01732423242`.
-- **Response:** System normalizes number to `+8801732423242`, queries database for collisions within the agency, creates record `ST-1024`, and sets stage to `New Enquiry`.
-- **Stimulus:** Counselor inputs a phone or email matching an existing lead or student in the agency.
-- **Response:** System displays collision alert modal, shows link to existing dossier, and appends the new inquiry source to the existing record's timeline without duplicating the row.
+- **Stimulus:** Counselor clicks `+ Add New Lead` from the Lead Pipeline header.
+- **Response:** System displays the **"Create New Lead"** modal dialog with auto-generated `Lead ID*` (e.g., `LD-034345`), full name, contact, email, branch, counselor, and target country/course fields.
+- **Stimulus:** Counselor fills in details and clicks `Create Lead`.
+- **Response:** System normalizes contact numbers (E.164), checks for collisions, persists lead record, and inserts a new card into the `New Lead` column.
+- **Stimulus:** Counselor clicks `Move To Counseling` on a lead card.
+- **Response:** Card transitions to `Counseling` column; system logs audit event and prompts for counseling session notes.
+- **Stimulus:** Counselor clicks `Move To Interested` on a counseling lead card.
+- **Response:** Card transitions to `Interested` column; updates next follow-up status.
+- **Stimulus:** Counselor clicks `Move To Application` on an interested lead card.
+- **Response:** Card transitions to `Application` column; displays the primary orange action button `File Opening / Start Application`.
+- **Stimulus:** Counselor clicks `File Opening / Start Application` on an application lead card.
+- **Response:** System displays the **"New File Opening"** comprehensive modal dialog prefilled with `Lead ID*` and `Full Name*`.
 
 #### 3.4.3 Functional Requirements
-- **REQ-LEAD-001:** The system SHALL ingest leads containing mandatory fields: `Full Name`, `Contact Phone`, `Branch`, `Target Destination`, and `Source Channel`.
-- **REQ-LEAD-002:** The system SHALL execute algorithmic deduplication on every lead creation attempt:
-  - Phone numbers SHALL be normalized to E.164 international standard.
-  - Emails SHALL be trimmed and normalized to lowercase.
-  - Collisions against existing records SHALL be rejected from new creation and appended to the existing timeline.
-- **REQ-LEAD-003:** The system SHALL support capturing an Academic Credentials Matrix for every lead:
-  - Prior Exams: SSC/O-Level, HSC/A-Level/Diploma, Bachelor, Master's.
-  - Academic metadata: Passing Year, Board/University, Result/CGPA, Scale.
-  - English Language Test: Type (IELTS, PTE, TOEFL, DET, None), Overall Score, Band breakdown (Listening, Reading, Writing, Speaking).
-- **REQ-LEAD-004:** The system SHALL provide a drag-and-drop visual Kanban pipeline rendering stages: `New Enquiry` $\rightarrow$ `Counseling` $\rightarrow$ `Interested` $\rightarrow$ `Application Ready` $\rightarrow$ `File Opening`.
-- **REQ-LEAD-005:** The system SHALL record an immutable audit entry whenever a lead is moved across stages or reassigned to a different counselor.
+- **REQ-LEAD-001 (Create New Lead PopUp Modal):** The system SHALL provide a modal dialog triggered by `+ Add New Lead` capturing:
+  1. `Lead ID*`: System-generated alphanumeric identifier (e.g., `LD-034345`, read-only).
+  2. `Full Name*`: Prospective student legal full name (text input).
+  3. `Contact Number*`: Primary phone number (text input, E.164 validated).
+  4. `Email*`: Email address (email input, lowercase normalized).
+  5. `Branch*`: Dropdown selector (e.g., `Dhaka`, `Tangail`).
+  6. `Assign Counsellor*`: Dropdown selector filtered by active counselors in selected branch.
+  7. `Interested Country*`: Dropdown selector (e.g., `CA - Canada`, `AU - Australia`, `UK`, `FI - Finland`).
+  8. `Interested Course*`: Course preference input/selector (e.g., `MSc Computer Science`).
+  9. Submission button: `Create Lead` (primary action).
+- **REQ-LEAD-002 (Algorithmic Deduplication):** Before inserting any lead, the system SHALL check for duplicate normalized phone numbers or lowercase email addresses within the agency tenant. Collisions SHALL abort creation, trigger a duplicate notification, and append the inquiry source to the existing file's activity feed.
+- **REQ-LEAD-003 (Kanban Board Architecture & Direct Stage Buttons):** The system SHALL render a 4-column Kanban board: `New Lead`, `Counseling`, `Interested`, and `Application`. Each card SHALL display:
+  - Header: Avatar initials, Lead ID (`LD-XXXXXX`), and context menu.
+  - Body: Full Name, Phone, Email, Branch, Counselor, Interested Country, and Interested Program.
+  - Footer Action Button:
+    - On `New Lead`: Button labeled `Move To Counseling`.
+    - On `Counseling`: Button labeled `Move To Interested`.
+    - On `Interested`: Button labeled `Move To Application`.
+    - On `Application`: Prominent primary button labeled `File Opening` / `Start Application`.
+- **REQ-LEAD-004 (Stage Audit Logging):** Every button-triggered transition or drag-and-drop movement SHALL record an audit entry logging `lead_id`, `previous_stage`, `new_stage`, `acting_user_id`, and `timestamp`.
 
 ---
 
-### 3.5 System Feature: Student Dossier & 360° Case Management
+### 3.5 System Feature: Student Dossier & 360° Case Management (New File Opening Workflow)
 
 #### 3.5.1 Description & Priority
-Centralized master dossier binding academic history, passport identity, multi-applications, documents, payments, and case notes into a single source of truth.  
+Governs the formal student conversion process via the comprehensive **"New File Opening"** modal, initializing permanent student master dossiers and portal login credentials.  
 **Priority:** Must Have (M).
 
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                      POP-UP MODAL: NEW FILE OPENING                                       [X] |
++---------------------------------------------------------------------------------------------------------------+
+| Lead ID*               [ ST-0324324          ] | Full Name*             [ Enter full name...            ]     |
+| Email*                 [ Enter email...      ] | Password*              [ Enter password...             ]     |
+| Contact Number*        [ Enter contact no... ] | What's App Number*     [ Enter WhatsApp number...      ]     |
+| Branch*                [ Choose branch...  ▼ ] |                                                              |
+| Reference*             [ Enter reference...  ] | Budget Idea*           [ Enter budget idea...          ]     |
+| Interested Country*    [ Choose country... ▼ ] | Interested Course*     [ Choose courses...           ▼ ]     |
+|                                                                                                               |
+| ACADEMIC QUALIFICATION*                                                                                       |
+| +----+-------------------------+--------------+----------------------+---------+                              |
+| | No | Name of Exam            | Passing Year | Institution / Board  | Result  |                              |
+| +----+-------------------------+--------------+----------------------+---------+                              |
+| | 01 | SSC/Dakhil/O-Level      | 2016         | Dhaka Board          | 5.00    |                              |
+| | 02 | HSC/Alim/Dip/A-Level    | 2018         | Dhaka Board          | 5.00    |                              |
+| | 03 | Bachelor                | 2023         | Dhaka University     | 3.80    |                              |
+| | 04 | Master's                | 2025         | Dhaka University     | 3.75    |                              |
+| +----+-------------------------+--------------+----------------------+---------+                              |
+|                                                                                                               |
+| IELTS/PTE/TOEFL/Others*[ Enter score...      ] | Assign Counsellor*     [ Select counsellor...        ▼ ]     |
+| Communication Note*    [ Enter communication note / remarks.................................. ]               |
+|                                                                                                               |
+|                                                     [ Create Student / Confirm File Opening ] (Primary Orange)|
++---------------------------------------------------------------------------------------------------------------+
+```
+
 #### 3.5.2 Stimulus / Response Sequences
-- **Stimulus:** Counselor drags a lead card into `File Opening`.
-- **Response:** System verifies all mandatory conversion fields (`BR-02`), generates permanent identifier `STU-26DHK-0248`, initializes document checklist, and creates master dossier.
-- **Stimulus:** Counselor clicks "Export PDF Dossier".
-- **Response:** System compiles personal details, academic history, test scores, application states, and verified document summaries into a branded PDF document.
+- **Stimulus:** Counselor clicks `File Opening` / `Start Application` on an application card in the Kanban board.
+- **Response:** System opens the **"New File Opening"** modal, automatically populating `Lead ID*` and existing contact fields.
+- **Stimulus:** Counselor inputs `Password*` (for student portal access), `What's App Number*`, `Reference*`, `Budget Idea*`, fills the `Academic Qualification*` table, enters `IELTS/PTE Score`, and clicks `Create Student / Confirm File Opening`.
+- **Response:** System validates mandatory fields (`BR-02`), creates student portal login, generates permanent ID `STU-26DHK-0248`, archives lead card as converted, and opens the Student 360° Master Dossier.
 
 #### 3.5.3 Functional Requirements
-- **REQ-STU-001:** The system SHALL issue a permanent, unique student identification number upon file opening matching format: `STU-[YY][BRANCH_CODE]-[0-9]{4}` (e.g., `STU-26DHK-0248`).
-- **REQ-STU-002:** The system SHALL block conversion of a lead into a student unless the following fields are completed: Legal Full Name, Verified Email, WhatsApp Phone, Prior Academic Qualification with GPA/Result, Target Country, Target Intake, and Declared Budget.
-- **REQ-STU-003:** The Student Master Dossier SHALL provide 5 synchronized operational tabs:
+- **REQ-STU-001 (New File Opening Modal Fields):** The system SHALL provide a dedicated modal dialog for student conversion capturing:
+  1. `Lead ID*`: Pre-populated from lead (read-only).
+  2. `Full Name*`: Official student name matching passport.
+  3. `Email*` & `Password*`: Credentials used to provision the student self-service portal account.
+  4. `Contact Number*` & `What's App Number*`: Separate contact telephone fields.
+  5. `Branch*`: Selected agency branch dropdown.
+  6. `Reference*`: Lead acquisition referral source (e.g., student referral, digital ad, agent).
+  7. `Budget Idea*`: Declared financial budget for international tuition and living expenses.
+  8. `Interested Country*` & `Interested Course*`: Target study destination and discipline.
+  9. `Academic Qualification* Table`: Multi-row structured table capturing:
+     - `No`: Sequential row index (`01`, `02`, `03`, `04`).
+     - `Name of Exam`: Qualification category (`SSC/Dakhil/O-Level`, `HSC/Alim/Dip/A-Level`, `Bachelor`, `Master's`).
+     - `Passing Year`: 4-digit calendar graduation year.
+     - `Institution / Board`: Board of Intermediate and Secondary Education or University name.
+     - `Result`: Cumulative GPA (scale of 5.00 or 4.00) or percentage.
+  10. `IELTS/PTE/TOEFL/Others*`: Standardized English language proficiency examination overall score and bands.
+  11. `Assign Counsellor*`: Designated case owner counselor.
+  12. `Communication Note/Remarks*`: Initial intake counseling summary.
+- **REQ-STU-002 (Student Master Dossier Generation):** Upon submission of the New File Opening form, the system SHALL:
+  - Validate all mandatory fields (`BR-02`).
+  - Encrypt `Password*` using `bcrypt` and instantiate the student portal login account.
+  - Issue permanent Student ID `STU-[YY][BRANCH_CODE]-[0-9]{4}` (e.g., `STU-26DHK-0248`).
+  - Store academic qualification rows in `academic_records` table.
+  - Bind lead history, inquiries, and counseling notes into the student dossier timeline.
+- **REQ-STU-003 (Dossier Tabs):** The Student Master Dossier SHALL provide 5 synchronized operational tabs:
   1. `Overview`: Personal info, emergency contacts, passport details, sponsor information.
   2. `Applications`: Tabular tracking of all university applications.
   3. `Documents`: Categorized document verification checklist.
   4. `Payments`: Service fee invoices, payment receipts, balance status.
   5. `Notes & Timeline`: Chronological activity stream of counselor calls, status shifts, and meeting notes.
-- **REQ-STU-004:** The system SHALL provide an automated PDF export engine capable of generating a standardized, agency-branded Student Case Profile summary document.
+- **REQ-STU-004 (PDF Dossier Export Engine):** The system SHALL generate a branded, standardized PDF Student Dossier report containing academic credentials, test scores, target programs, and current application progress.
 
 ---
 
