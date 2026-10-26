@@ -457,38 +457,128 @@ Governs the formal student conversion process via the comprehensive **"New File 
   - Issue permanent Student ID `STU-[YY][BRANCH_CODE]-[0-9]{4}` (e.g., `STU-26DHK-0248`).
   - Store academic qualification rows in `academic_records` table.
   - Bind lead history, inquiries, and counseling notes into the student dossier timeline.
-- **REQ-STU-003 (Dossier Tabs):** The Student Master Dossier SHALL provide 5 synchronized operational tabs:
-  1. `Overview`: Personal info, emergency contacts, passport details, sponsor information.
-  2. `Applications`: Tabular tracking of all university applications.
-  3. `Documents`: Categorized document verification checklist.
-  4. `Payments`: Service fee invoices, payment receipts, balance status.
-  5. `Notes & Timeline`: Chronological activity stream of counselor calls, status shifts, and meeting notes.
-- **REQ-STU-004 (PDF Dossier Export Engine):** The system SHALL generate a branded, standardized PDF Student Dossier report containing academic credentials, test scores, target programs, and current application progress.
+- **REQ-STU-003 (Students Overview Listing Screen):** The system SHALL provide a centralized Students Directory rendering:
+  1. Top KPI Summary Metric Cards with month-over-month trends:
+     - `Total Students`: Cumulative student count (e.g., `6,500` with `+3% from last month`).
+     - `Active Students`: Active case files (e.g., `500` with `+3% from last month`).
+     - `Application State`: Applications currently in review or submitted (e.g., `324`).
+     - `Visa Processing`: Students in active visa compilation (e.g., `186`).
+  2. Multi-Criteria Filter Bar:
+     - Text Search: Real-time query matching Student Name, Student ID (`ST-XXXX`), or Phone Number.
+     - Dropdown Filters: `Branch` (e.g., All, Dhaka, Tangail), `IELTS` score threshold, `Destination` country, and `Subject` discipline.
+  3. Master Students Table:
+     - Columns: `Student Id`, `Name`, `Branch`, `Destination`, `Phone`, `Email`, `Admission Date`, `Eng. Score`, `Application` (count of applications), `Status` (`Active` / `Inactive`), `Action`.
+  4. Server-Side Pagination: `Showing 1-10 of [Total] Students` with page selector.
+
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                            STUDENTS OVERVIEW DIRECTORY                                        |
+| [ Total Students: 6,500 ]   [ Active Students: 500 ]   [ Application State: 324 ]   [ Visa Processing: 186 ]  |
++---------------------------------------------------------------------------------------------------------------+
+| Search: [ Search by name, ID, phone... ]  Branch: [ All ▼ ]  IELTS: [ All ▼ ]  Dest: [ All ▼ ]  Subj: [ All ▼]|
++----------+------------------+---------+-------------+--------------------+-------+----------+--------+--------+
+| Stud ID  | Name             | Branch  | Destination | Email              | IELTS | App Count| Status | Action |
++----------+------------------+---------+-------------+--------------------+-------+----------+--------+--------+
+| STU-0248 | Rahat Khan       | Dhaka   | Canada      | rahman32@gmail.com | 6.50  | 05       | Active | [View] |
+| ST-0201  | Zaire Westervelt | Dhaka   | Australia   | zaire@yahoo.com    | 6.00  | 02       | Active | [View] |
+| ST-0202  | Emerson Saris    | Tangail | Canada      | emerson@yahoo.com  | 6.00  | 02       | Active | [View] |
++----------+------------------+---------+-------------+--------------------+-------+----------+--------+--------+
+```
+
+- **REQ-STU-004 (Student Details 360° Dossier & KPI Summary Cards):** The Student Details view SHALL display:
+  - Header: Student Avatar, Full Name (`Rahat Khan`), Status Badge (`Active`), Student ID (`Student ID: STU-0248`), Joined Date (`Sep 12, 2026`), and Top Action Button `Export PDF`.
+  - Top 4 Synchronized KPI Metric Widgets:
+    1. `Applications`: Total and in-progress applications (e.g., `05 Applications` | `2 In Progress / 5 Total`).
+    2. `Documents`: Document readiness ratio (e.g., `16 Document` | `08 Verified / 16 Total`).
+    3. `Total Paid`: Cumulative payments collected (e.g., `7,435.00 USD` with `Payment Complete` badge).
+    4. `Current Stage`: Global student milestone (e.g., `Offer Received` / `Visa Processing`).
+  - Tab Navigation Bar: `Overview`, `Applications`, `Documents`, `Payments`, `Notes & Timeline`.
+
+```
++---------------------------------------------------------------------------------------------------------------+
+| STUDENT DOSSIER: Rahat Khan  [ Active ]  Student ID: STU-0248  Joined: Sep 12, 2026              [ Export PDF ]|
++---------------------------------------------------------------------------------------------------------------+
+| [ 05 Applications ]          | [ 16 Documents ]             | [ 7,435.00 USD ]            | [ Current Stage ] |
+| 2 In Progress / 5 Total      | 08 Verified / 16 Total       | Payment Complete            | Offer Received    |
++---------------------------------------------------------------------------------------------------------------+
+| [ OVERVIEW ]   [ APPLICATIONS (05) ]   [ DOCUMENTS (16) ]   [ PAYMENTS ]   [ NOTES & TIMELINE ]               |
++---------------------------------------------------------------------------------------------------------------+
+```
+
+- **REQ-STU-005 (Dossier Tab 1: Overview Breakdown):**
+  1. `Personal Info Card`: Counselor name, Email, Phone Number, WhatsApp Number, Current Address, Permanent Address, Date of Birth, Gender, Nationality, Marital Status.
+  2. `Academic Info Card`: Highest & prior degrees: Bachelor (University, CGPA, Year), HSC (Board, GPA, Year), SSC (Board, GPA, Year), and English Language Test Score (IELTS overall & bands).
+  3. `Passport Info Card`: Passport Number, Expiry Date, Issuing Country.
+  4. `Profile Status Widget`: Circular progress indicator displaying completion percentage (e.g., `85% Complete` with Completed and Remaining breakdowns).
+  5. `Upcoming Deadlines Widget`: Interactive list of pending student tasks with due dates (e.g., *Submit University Application Oct 05, 2026 [Pending Upload]*, *Upload Financial Document Oct 05, 2026 [Pending Upload]*).
+  6. `Recent Activity Widget`: Chronological micro-feed of latest student updates (e.g., *Financial document uploaded Sep 28 · 10:12 AM*, *Offer received Sep 28 · 10:12 AM*, *Payment received — $500*).
+
+- **REQ-STU-006 (Dossier Tab 2: Applications Sub-System):**
+  - KPI Stat Bar: `Total` (05 Applications), `In Progress` (02 Applications), `Offers Received` (01 Applications), `Rejected` (02 Applications).
+  - Applications Grid:
+    - Columns: `No`, `University`, `Program`, `Intake`, `Application Fee`, `Type` (Degree Level, e.g., Master's), `Status` (`In Progress`, `Submitted`, `Offer Rcvd.`, `Draft`), `Deadline`.
+    - Clicking any application row opens the **Application Timeline Slide-over Drawer**.
+
+- **REQ-STU-007 (Dossier Tab 3: Documents Matrix):**
+  - KPI Stat Bar: `Total Documents` (16), `Verified` (08), `Pending Review` (04), `Missing` (02).
+  - Document Verification Table:
+    - Columns: `No`, `Document Name`, `Category` (`Identity`, `Bachelor`, `HSC`, `Language`, `Financial`, `Application`), `Deadline`, `File` (`View` link / `Upload` button), `Uploaded Date/Time` (e.g., `01 Oct at 10:20am` or `Not upload yet`), `Status` (`Verified` [green tag], `Pending` [orange tag], `Missing` [gray/red tag]), `Action`.
+    - Integrated document checklist covers: Passport, Academic Transcript Bachelor, Academic Transcript HSC, IELTS Certificate, Sponsor Letter, Recommendation Letter, Financial Solvency, and Bank Statement.
+
+- **REQ-STU-008 (Dossier Tab 4: Payments Ledger):**
+  - Displays agency fee payment confirmation banner: *"All required payments have been successfully received. No outstanding balance at this time."*
+  - Shows total collected service revenue and itemized receipt vouchers.
+
+- **REQ-STU-009 (Dossier Tab 5: Notes & Timeline with Milestone Stepper):**
+  - Top Horizontal Milestone Stepper: Visual multi-step progress bar displaying sequential case stages:  
+    `File Opening` $\longrightarrow$ `Counseling` $\longrightarrow$ `Application` $\longrightarrow$ `Offer Letter` $\longrightarrow$ `Visa Processing` $\longrightarrow$ `Enrollment`.
+  - Chronological Activity Feed: Captures counselor consultation logs, system-triggered status updates, document uploads, and payment receipts with timestamp and author tags.
+  - Interactive Follow-up Note Box allowing counselors to record private observations.
+
+- **REQ-STU-010 (Application Timeline & Update State Slide-Over Drawer):**
+  - The system SHALL provide a right-hand slide-over drawer triggered by clicking an application or "Update State" button.
+  - Displays real-time milestone checkpoints under `Application Timeline` and `Visa Processing`.
+  - Provides a primary action button `Update State` enabling authorized officers to lodge stage transitions.
 
 ---
 
-### 3.6 System Feature: Multi-Application Lifecycle Tracking
+### 3.6 System Feature: Multi-Application Lifecycle Tracking (Global Applications Hub)
 
 #### 3.6.1 Description & Priority
-Tracks multiple simultaneous university submissions per student across different institutions, terms, and destinations with strict state progression rules.  
+Delivers an agency-wide application management dashboard allowing admissions teams to monitor university submissions across all active students, intakes, and partner institutions.  
 **Priority:** Must Have (M).
 
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                          GLOBAL APPLICATIONS DIRECTORY                                        |
+| [ Total: 6,500 (+3%) ]   [ In Progress: 500 (+3%) ]   [ Offers Received: 324 (+3%) ]   [ Rejected: 186 (+3%) ]|
++---------------------------------------------------------------------------------------------------------------+
+| Search: [ Search by name, ID, phone... ]  University: [ All ▼ ]  Intake: [ All ▼ ]  Prog: [ All ▼ ]  Status: [ All]|
++----------+------------------+------------------------+-----------------------+-----------+---------+----------+
+| Stud ID  | Student Name     | University             | Program               | Intake    | Fee     | Status   |
++----------+------------------+------------------------+-----------------------+-----------+---------+----------+
+| ST-0201  | Zaire Westervelt | University of Toronto  | Msc. Computer Science | Fall 2027 | $150.00 | In Progr.|
+| ST-0201  | Emerson Saris    | University of Waterloo | Msc. Computer Science | Fall 2027 | $150.00 | In Progr.|
+| ST-0201  | Jaxson Philips   | University of Alberta  | Msc. Computer Science | Fall 2027 | $120.00 | Submitted|
+| ST-0201  | Martin Torff     | University of Waterloo | Msc. Data Science     | Fall 2027 | $180.00 | Offer Rcv|
++----------+------------------+------------------------+-----------------------+-----------+---------+----------+
+```
+
 #### 3.6.2 Stimulus / Response Sequences
-- **Stimulus:** Admissions Officer creates an application for Harbour University for Master of Business, February 2027 intake.
-- **Response:** System generates application code `APP-2401`, binds it to the student record, and sets initial status to `Draft`.
-- **Stimulus:** Counselor attempts to lodge application to university while Bachelor transcript is marked `Needs Correction`.
-- **Response:** System blocks status progression and renders an alert: *"Cannot transition to Submitted: Mandatory academic documents are not verified."*
+- **Stimulus:** Admissions Specialist opens the global `Applications` screen.
+- **Response:** System displays cumulative KPI metrics (`Total`, `In Progress`, `Offers Received`, `Rejected`), multi-field filters, and master application table.
+- **Stimulus:** Officer filters by University: `University of Toronto` and Intake: `Fall 2027`.
+- **Response:** Table instantly filters matching student applications with status badges and deadlines.
+- **Stimulus:** Officer clicks on an application row.
+- **Response:** System opens the **Application Timeline Slide-over Drawer** detailing status progression and enabling stage updates.
 
 #### 3.6.3 Functional Requirements
-- **REQ-APP-001:** The system SHALL support creating $N$ independent university application records (`APP-XXXX`) under a single student master record.
-- **REQ-APP-002:** Each application record SHALL capture: `Target Institution`, `Program Title`, `Study Level`, `Intake Month & Year`, `Application Fee & Currency`, `Current Stage`, and `Action Due Date`.
-- **REQ-APP-003:** The system SHALL enforce an automated sequential state machine:
-  $$\text{Draft} \longrightarrow \text{Under Review} \longrightarrow \text{Ready to Submit} \longrightarrow \text{Submitted} \longrightarrow \begin{cases} \text{Conditional Offer} \\ \text{Unconditional Offer} \\ \text{Rejected} \end{cases} \longrightarrow \text{Deposit Pending} \longrightarrow \text{Enrolled}$$
-- **REQ-APP-004:** The system SHALL prohibit transitioning an application to `Submitted` unless all mandatory application documents for that institution possess a `Verified` status badge.
-- **REQ-APP-005:** The system SHALL compute an Action Due SLA indicator for every active application:
-  - Green Tag: Action due in $>3$ business days.
-  - Orange Tag (`st-warn`): Action due within 48 hours.
-  - Red Tag (`st-danger`): Action overdue; triggers an automated notification to the Branch Manager.
+- **REQ-APP-001 (Global Applications Directory):** The system SHALL provide an agency-wide applications table capturing: `Student ID`, `Student Name`, `University`, `Phone`, `Email`, `Program`, `Intake`, `Application Fee`, `Status`, and `Action`.
+- **REQ-APP-002 (Global Application KPI Metric Cards):** The header SHALL render 4 summary metric widgets with month-over-month trend indicators: `Total Applications`, `In Progress`, `Offers Received`, and `Rejected`.
+- **REQ-APP-003 (Sequential State Progression Machine):** Each application SHALL progress through a rigid sequential state machine:
+  $$\text{Draft} \longrightarrow \text{In Progress} \longrightarrow \text{Submitted} \longrightarrow \begin{cases} \text{Offer Received (Conditional/Unconditional)} \\ \text{Rejected} \end{cases} \longrightarrow \text{Deposit Paid} \longrightarrow \text{Visa Processing} \longrightarrow \text{Enrolled}$$
+- **REQ-APP-004 (Document Verification Gating):** An application SHALL NOT transition to `Submitted` unless all mandatory application documents for that program hold a `Verified` status badge.
+- **REQ-APP-005 (Application Timeline Slide-over Drawer):** Clicking an application row SHALL open a contextual slide-over drawer displaying chronological milestone updates and allowing authorized admissions officers to update the application stage.
 
 ---
 
@@ -499,8 +589,8 @@ Manages the uploading, screening, version archiving, and verification of student
 **Priority:** Must Have (M).
 
 #### 3.7.2 Stimulus / Response Sequences
-- **Stimulus:** Student uploads replacement file for Bachelor Transcript via the student portal.
-- **Response:** System archives existing file as `v1`, marks replacement as `v2`, sets review status to `In Review`, and notifies the assigned admissions officer.
+- **Stimulus:** Student or counselor uploads replacement file for Bachelor Transcript.
+- **Response:** System archives existing file as `v1`, marks replacement as `v2`, sets review status to `In Review`, and notifies admissions officer.
 - **Stimulus:** Admissions officer marks a document as `Needs Correction` with note: *"Missing final semester grade sheet."*
 - **Response:** System flags document badge as orange (`Needs Correction`), updates timestamp, and displays an alert banner on the student portal.
 
