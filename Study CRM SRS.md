@@ -582,143 +582,263 @@ Delivers an agency-wide application management dashboard allowing admissions tea
 
 ---
 
-### 3.7 System Feature: Document Review, Versioning & Quality Assurance
+### 3.7 System Feature: Document Review, Versioning & Quality Assurance (Document Hub)
 
 #### 3.7.1 Description & Priority
-Manages the uploading, screening, version archiving, and verification of student identity, academic, language, and financial records.  
+Delivers an agency-wide document management center for screening, verifying, and version-tracking all student identity, academic, language, and financial records.  
 **Priority:** Must Have (M).
 
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                            DOCUMENT VERIFICATION CENTER                                       |
+| [ Total Docs: 6,500 (+3%) ]   [ Pending Review: 500 (+3%) ]   [ Verified: 324 (+3%) ]   [ Rejected: 186 (+3%) ]|
++---------------------------------------------------------------------------------------------------------------+
+| Search: [ Search by student, file name... ]   Branch: [ All ▼ ]   Category: [ All ▼ ]   Status: [ All ▼ ]     |
++----------+------------------+---------------------+-----------+-------------+-----------+----------+----------+
+| Stud ID  | Student Name     | Document Name       | Category  | Upload Date | File Size | Status   | Action   |
++----------+------------------+---------------------+-----------+-------------+-----------+----------+----------+
+| STU-0248 | Rahat Khan       | Passport Scan       | Identity  | 01 Oct 2026 | 2.4 MB    | Verified | [Preview]|
+| STU-0248 | Rahat Khan       | Bachelor Transcript | Academic  | 02 Oct 2026 | 4.1 MB    | Pending  | [Review] |
+| ST-0201  | Zaire Westervelt | Bank Solvency Cert  | Financial | 28 Sep 2026 | 1.8 MB    | Rejected | [Re-eval]|
+| ST-0202  | Emerson Saris    | IELTS Test Report   | Language  | 29 Sep 2026 | 850 KB    | Verified | [Preview]|
++----------+------------------+---------------------+-----------+-------------+-----------+----------+----------+
+```
+
 #### 3.7.2 Stimulus / Response Sequences
-- **Stimulus:** Student or counselor uploads replacement file for Bachelor Transcript.
-- **Response:** System archives existing file as `v1`, marks replacement as `v2`, sets review status to `In Review`, and notifies admissions officer.
-- **Stimulus:** Admissions officer marks a document as `Needs Correction` with note: *"Missing final semester grade sheet."*
-- **Response:** System flags document badge as orange (`Needs Correction`), updates timestamp, and displays an alert banner on the student portal.
+- **Stimulus:** Admissions/Visa Officer clicks `[Review]` on a pending document row.
+- **Response:** System opens the **Document Preview Slide-over Drawer** rendering the file inline (PDF/image viewer) alongside metadata: student name, category, version (`v1`, `v2`), and upload timestamp.
+- **Stimulus:** Officer clicks `Verify / Approve` in the preview drawer.
+- **Response:** System updates document status to `Verified`, records reviewer User ID and timestamp, and notifies the assigned counselor.
+- **Stimulus:** Officer clicks `Request Correction / Reject` and types: *"Final semester grade column is illegible; upload 300 DPI scan."*
+- **Response:** System sets status to `Needs Correction` / `Rejected`, locks reviewer notes, and posts an urgent remediation alert to the student portal.
 
 #### 3.7.3 Functional Requirements
-- **REQ-DOC-001:** The system SHALL categorize all documents under: `Identity`, `Academic`, `Language`, `Financial`, and `Visa Case Evidence`.
-- **REQ-DOC-002:** The system SHALL enforce an immutable version control tree (`v1`, `v2`, `v3`, etc.) for every document slot. Prior versions SHALL remain accessible to authorized staff for audit purposes.
-- **REQ-DOC-003:** The system SHALL support 4 distinct review statuses: `Missing`, `In Review`, `Needs Correction`, and `Verified`.
-- **REQ-DOC-004:** Marking a document as `Needs Correction` SHALL mandate the input of a textual correction note explaining the deficiency.
-- **REQ-DOC-005:** Marking a document as `Verified` SHALL stamp the record with the reviewer's User ID, timestamp, and lock the document against deletion.
-- **REQ-DOC-006:** The system SHALL restrict file uploads strictly to MIME types `application/pdf`, `image/jpeg`, and `image/png` with a maximum file size threshold of $10\text{ MB}$.
-- **REQ-DOC-007:** The system SHALL deliver document files strictly via temporary pre-signed object URLs with an expiration TTL not exceeding 15 minutes.
+- **REQ-DOC-001 (Document Directory & KPI Metrics):** The system SHALL provide an agency-wide Document Verification directory featuring 4 summary metric widgets: `Total Documents`, `Pending Review`, `Verified`, and `Rejected` with month-over-month trends.
+- **REQ-DOC-002 (Document Filters & Table Columns):** The directory table SHALL provide search and filters (`Branch`, `Category`, `Status`) and display columns: `Student ID`, `Student Name`, `Document Name`, `Category`, `Upload Date`, `File Size/Type`, `Status`, and `Action`.
+- **REQ-DOC-003 (Document Preview Slide-over Drawer):** Clicking `Action` SHALL open a slide-over drawer rendering the document preview alongside decision buttons:
+  - `Verify / Approve`: Stamps file as `Verified` and locks it against modification.
+  - `Request Correction / Reject`: Prompts for mandatory feedback remarks displayed directly on the student portal.
+- **REQ-DOC-004 (Immutable Version Control):** Uploading replacement files SHALL increment the version counter (`v1`, `v2`, `v3`) without overwriting previous uploads.
+- **REQ-DOC-005 (File Constraints & Pre-Signed URLs):** File uploads SHALL be restricted to MIME types `application/pdf`, `image/jpeg`, and `image/png` ($\le 10\text{ MB}$). Files SHALL be accessed exclusively via temporary pre-signed URLs expiring in $\le 15\text{ minutes}$.
 
 ---
 
 ### 3.8 System Feature: Visa Processing & Compliance Management
 
 #### 3.8.1 Description & Priority
-Governs post-admission visa file compilation, financial solvency screening, biometrics tracking, and embassy decision recording.  
+Governs post-admission visa file compilation, biometrics scheduling, embassy submission tracking, and visa outcome recording.  
 **Priority:** Must Have (M).
 
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                             VISA CASES MANAGEMENT                                             |
+| [ Total Cases: 200 (+3%) ]   [ In Progress: 120 (+3%) ]   [ Approved / Granted: 55 ]   [ Refused: 25 (+3%) ]  |
++---------------------------------------------------------------------------------------------------------------+
+| Search: [ Search by name, ID... ]     Country: [ All ▼ ]     Stage: [ All ▼ ]     Intake: [ All ▼ ]           |
+|                                                                                      [ + Create Visa Case ]   |
++----------+------------------+-------------+-----------------------+-----------+-------------------+-----------+
+| Case ID  | Student Name     | Destination | University            | Intake    | Stage             | Action    |
++----------+------------------+-------------+-----------------------+-----------+-------------------+-----------+
+| VISA-101 | Rahat Khan       | Canada      | University of Toronto | Fall 2027 | Document Prep.    | [Timeline]|
+| VISA-102 | Zaire Westervelt | Australia   | University of Sydney  | Feb 2027  | File Lodged       | [Timeline]|
+| VISA-103 | Emerson Saris    | Canada      | University of Alberta | Fall 2027 | Biometrics Done   | [Timeline]|
+| VISA-104 | Sadia Noor       | Finland     | Northern Coast UAS    | Aug 2027  | Visa Granted [OK] | [Timeline]|
++----------+------------------+-------------+-----------------------+-----------+-------------------+-----------+
+```
+
 #### 3.8.2 Stimulus / Response Sequences
-- **Stimulus:** Application stage updates to `Deposit Pending` with tuition receipt confirmed.
-- **Response:** System unlocks the `Visa Cases` module for the student, initializes destination-specific compliance checklist, and assigns a Visa Processing Officer.
-- **Stimulus:** Visa officer marks case as `Visa Granted` with embassy reference number.
-- **Response:** System updates student case tag to `Enrolled / Visa Granted`, issues an arrival task checklist, and triggers expected commission calculation in Finance.
+- **Stimulus:** Visa Officer clicks `+ Create Visa Case`.
+- **Response:** System displays the **"Create New Visa Case"** modal dialog with student search, accepted application selector, country, embassy file number, assigned officer, target lodge date, and notes.
+- **Stimulus:** Officer submits the form.
+- **Response:** System initializes visa case record `VISA-XXXX`, attaches destination compliance checklist, and inserts case into directory.
+- **Stimulus:** Officer clicks `[Timeline]` on a visa row.
+- **Response:** System opens the **Case Timeline Slide-Over Drawer** rendering sequential milestone stages (`Offer Letter Received` $\rightarrow$ `Tuition Deposit Paid` $\rightarrow$ `Visa File Prepared` $\rightarrow$ `Biometrics Scheduled` $\rightarrow$ `Lodged to Embassy` $\rightarrow$ `Decision Received`).
 
 #### 3.8.3 Functional Requirements
-- **REQ-VISA-001:** The system SHALL initialize a Visa Case record only after an application achieves `Conditional Offer` (with conditions met) or `Unconditional Offer` and records verified tuition deposit payment.
-- **REQ-VISA-002:** The system SHALL dynamically render country-specific visa compliance checklists:
-  - **Canada:** SDS checklist (GIC verification, upfront medical confirmation, full Year 1 tuition receipt).
-  - **Australia:** Genuine Student (GS) evaluation, sponsor relationship proof, fund availability matrix.
-  - **UK / Europe:** Financial maintenance duration (28-day rule), TB test certificate, CAS verification.
-- **REQ-VISA-003:** The system SHALL record visa milestone dates: `File Lodged Date`, `Biometrics/VFS Date`, `Interview Date` (if applicable), `Visa Outcome Date`, `Visa Grant/Refusal Reference Number`.
-- **REQ-VISA-004:** In the event of a visa refusal, the system SHALL mandate the upload of the official embassy refusal letter and record the specific refusal ground without deleting historical case data.
+- **REQ-VISA-001 (Visa Cases Directory & KPI Metrics):** The system SHALL provide a dedicated Visa Cases screen with 4 top KPI cards: `Total Visa Cases`, `In Progress`, `Approved / Granted`, and `Refused`.
+- **REQ-VISA-002 (Create New Visa Case Modal):** The system SHALL provide a creation modal capturing:
+  1. `Student*`: Searchable selector linking to active student.
+  2. `Application*`: Dropdown filtered to applications holding accepted offer letters.
+  3. `Destination Country*`: Auto-populated from application (e.g., Canada, Australia, UK).
+  4. `Embassy Reference / Application No`: Official consular file tracking code.
+  5. `Assigned Visa Officer*`: Designated compliance handler.
+  6. `Target Submission Date`: Calendar date picker.
+  7. `Case Notes`: Internal processing remarks.
+- **REQ-VISA-003 (Case Timeline Slide-Over Drawer):** The system SHALL provide a slide-over drawer tracking the full visa journey:
+  - Step 1: *Offer Letter Received & Verified*
+  - Step 2: *Tuition Deposit Paid & Bank Swift Attached*
+  - Step 3: *Visa Documents & Financial Solvency Compiled*
+  - Step 4: *Biometrics / VFS Appointment Scheduled*
+  - Step 5: *Application Lodged to High Commission / Embassy*
+  - Step 6: *Visa Outcome Decided (Granted / Refused)*
+- **REQ-VISA-004 (Visa Outcome Recording):** In the event of a visa refusal, the system SHALL mandate the upload of the official embassy refusal notice and record specific refusal grounds (`Financial Funds`, `Ties to Home Country`, `Academic Capability`) without deleting historical data.
 
 ---
 
 ### 3.9 System Feature: Program Finder, Comparison & Eligibility Engine
 
 #### 3.9.1 Description & Priority
-Provides a searchable institution and course catalogue featuring multi-criteria filtering, side-by-side program comparison, and automated student academic fit evaluation.  
+Provides a searchable institution and course catalogue featuring multi-criteria filtering, side-by-side program comparison, and automated application draft generation.  
 **Priority:** Should Have (S).
+
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                             PROGRAM FINDER CATALOGUE                                          |
+| Search: [ Master of Business... ]   Country: [ Australia ▼ ]   Level: [ Postgraduate ▼ ]   Intake: [ Feb 2027]|
+| Budget: [ AUD 35,000 / year    ]   Subject: [ Business   ▼ ]   English Test: [ IELTS  ▼ ]                     |
+| [X] Scholarship Available   [X] Fee Waiver   [X] STEM Designated   [X] No GRE   [X] 15-Yrs Accepted           |
++---------------------------------------------------------------------------------------------------------------+
+| Master of Business                  | MSc Business Analytics              | Bachelor of Computing             |
+| Harbour University · Australia      | Northlake College · Canada          | Meridian Int Uni · Malaysia       |
+| AUD 32,000 / year · 2 Years         | CAD 24,500 / year · 2 Years         | MYR 28,000 / year · 3 Years       |
+| IELTS 6.5 (min 6.0) · PTE 58        | IELTS 6.5 (min 6.0) · PTE 60        | IELTS 6.0 (min 5.5) · PTE 50      |
+|                                     |                                     |                                   |
+| [ Check Eligibility ] [ Shortlist ] | [ Check Eligibility ] [ Shortlist ] | [ Check Eligibility ] [ Shortlist]|
+| [ Apply Now ] (Primary Orange)      | [ Apply Now ] (Primary Orange)      | [ Apply Now ] (Primary Orange)    |
++---------------------------------------------------------------------------------------------------------------+
+```
 
 #### 3.9.2 Stimulus / Response Sequences
-- **Stimulus:** Counselor filters catalogue by Destination: `Australia`, Intake: `February 2027`, Level: `Postgraduate`, Max Budget: `35000 AUD`.
-- **Response:** System renders matching course cards displaying institution, annual fee, IELTS/PTE criteria, and intake status.
-- **Stimulus:** Counselor clicks "Check Eligibility" for student Ayesha Rahman against Harbour University Master of Business.
-- **Response:** System computes student GPA and IELTS bands against course rules and displays an interactive match/deficit table.
+- **Stimulus:** Counselor filters catalogue by Destination: `Australia`, Intake: `February 2027`, Level: `Postgraduate`, Max Budget: `35,000 AUD`.
+- **Response:** System renders matching course cards displaying institution, annual fee, IELTS/PTE criteria, duration, and intake availability.
+- **Stimulus:** Counselor clicks `Apply Now` on a program card.
+- **Response:** System displays the **"New Student Application"** modal dialog pre-filled with selected university, program title, fee, and intake term.
+- **Stimulus:** Counselor selects student Rahat Khan (`STU-0248`) and clicks `Create Application Draft`.
+- **Response:** System instantiates application `APP-XXXX`, links it to the student dossier, and opens the student application tab.
 
 #### 3.9.3 Functional Requirements
-- **REQ-PROG-001:** The system SHALL provide a multi-facet search engine filtering by: `Destination Country`, `Region/State`, `Program Level`, `Field of Study`, `Intake Month & Year`, `Annual Tuition Budget`, and `Tuition Currency`.
-- **REQ-PROG-002:** The system SHALL support specialized admission boolean filter flags: `Scholarship Available`, `Application Fee Waiver Route`, `Open for Applications`, `STEM Designated`, `ESL/Pathway Included`, `No GRE Required`, `No Maths Prerequisite`, `Medium of Instruction (MOI) English Waiver`, `15-Year Education Accepted`.
-- **REQ-PROG-003:** The system SHALL support selecting up to three (3) programs simultaneously and rendering a side-by-side comparative matrix.
-- **REQ-PROG-004:** The system SHALL execute an automated Eligibility Fit Algorithm comparing active student profile attributes against program requirements:
-  1. *Qualification Match:* Compares student degree level vs program prerequisite.
-  2. *Academic Cutoff:* Compares student CGPA/Percentage vs program minimum.
-  3. *English Overall & Sub-bands:* Compares test scores (IELTS/PTE) and flags any sub-band deficit.
-  4. *Budget Feasibility:* Compares declared annual budget against program annual tuition.
-- **REQ-PROG-005:** The eligibility engine SHALL render results using standard indicators: `Match` (Green tag), `Below Requirement` (Orange tag with specific deficit details), or `Funding Gap`.
+- **REQ-PROG-001 (Multi-Facet Filter Engine):** The system SHALL provide search filtering by: `Destination Country`, `Region/City`, `Program Level`, `Study Discipline`, `Intake Month & Year`, `Annual Tuition Budget`, and `Currency`.
+- **REQ-PROG-002 (Special Admission Flags):** The system SHALL support filter checkboxes: `Scholarship Listed`, `Application Fee Waiver`, `Open for Applications`, `STEM Designated`, `ESL/Pathway Included`, `No GRE Required`, `No Maths Prerequisite`, `Medium of Instruction (MOI) English Waiver`, `15-Year Education Accepted`.
+- **REQ-PROG-003 (New Student Application Modal):** Clicking `Apply Now` on any program card SHALL open a modal dialog capturing:
+  1. `Target Program & Institution`: Pre-filled (read-only).
+  2. `Select Student*`: Searchable student dropdown with quick student creator link.
+  3. `Intake Selection*`: Available intake term radio/selector.
+  4. `Document Readiness Check`: Summary indicating which mandatory checklist items are already verified for this student.
+  5. Action button: `Create Application Draft`.
+- **REQ-PROG-004 (Algorithmic Eligibility Matcher):** The system SHALL evaluate active student profiles against program benchmarks, highlighting exact matches (Green) or specific deficits (Orange) in GPA, English bands, or tuition budgets.
 
 ---
 
-### 3.10 System Feature: Accounts, Service Invoicing & Commission Ledger
+### 3.10 System Feature: Task & Appointment Management
 
 #### 3.10.1 Description & Priority
-Administers agency service fee billing, MFS payment recording, partner institution commission aging, and branch office expense auditing.  
-**Priority:** Must Have (M).
-
-#### 3.10.2 Stimulus / Response Sequences
-- **Stimulus:** Finance officer generates an invoice for student Ayesha Rahman for Application Support Service in the amount of BDT 5,000.
-- **Response:** System issues invoice `ST-INV-026`, updates student financial balance, and reflects invoice on student portal.
-- **Stimulus:** Student pays invoice via simulated/integrated mobile banking (bKash).
-- **Response:** System records payment, transitions invoice to `Paid`, and issues PDF receipt `ST-RCP-026`.
-
-#### 3.10.3 Functional Requirements
-- **REQ-FIN-001:** The system SHALL maintain strict ledger isolation: Agency service fee transactions SHALL be maintained exclusively in local currency (BDT); University tuition deposits and institutional commissions SHALL be recorded in their respective foreign currencies (AUD, CAD, GBP, EUR, USD).
-- **REQ-FIN-002:** The system SHALL generate agency service invoices with automated numbering (`ST-INV-[0-9]{4}`) tracking status: `Unpaid`, `Partially Paid`, `Paid`, `Cancelled`.
-- **REQ-FIN-003:** The system SHALL issue formal payment receipts (`ST-RCP-[0-9]{4}`) upon recording payment confirmation via Mobile Banking (bKash/Nagad), Bank Wire, or Cash.
-- **REQ-FIN-004:** The system SHALL track Institutional Commission Receivables across distinct financial lifecycle stages:
-  $$\text{Forecast / Expected} \longrightarrow \text{Invoiced to University} \longrightarrow \text{Overdue (>30, >60 days)} \longrightarrow \text{Received / Cleared}$$
-- **REQ-FIN-005:** Forecast institutional commissions SHALL NOT be counted as realized revenue until an official bank remittance credit advice is reconciled.
-- **REQ-FIN-006:** Staff members SHALL be capable of submitting Branch Office Expense vouchers (`Description`, `Branch`, `Amount BDT`, `Receipt Attachment`). Expense claims SHALL require Branch Manager approval prior to posting into branch operational P&L.
-
----
-
-### 3.11 System Feature: Operations: Employee Attendance, Tasks & Appointments
-
-#### 3.11.1 Description & Priority
-Coordinates daily staff presence, inter-branch task delegation, counseling appointment scheduling, and case reassignments.  
+Coordinates daily counselor tasks, student counseling appointments, deadline reminders, and supervisor escalations.  
 **Priority:** Should Have (S).
 
-#### 3.11.2 Stimulus / Response Sequences
-- **Stimulus:** Counselor clicks "Check In" upon arriving at the Dhaka office.
-- **Response:** System records timestamp, client IP, and marks staff member as `Present` on the branch attendance board.
-- **Stimulus:** Branch manager assigns a task: *"Verify bank statement for STU-0248"* with due date 21 September.
-- **Response:** System dispatches task to counselor's task queue and schedules automated reminder 24 hours prior to deadline.
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                            TASK & APPOINTMENT WORKSPACE                                       |
+| Filter: [ All Counselors ▼ ]   Branch: [ Dhaka ▼ ]   Date: [ Today ▼ ]                [ + Create New Task ]   |
++--------------------------------------+--------------------------------------+---------------------------------+
+| TODAY'S TASKS (5)                    | UPCOMING APPOINTMENTS (4)            | OVERDUE ESCALATIONS (2)         |
++--------------------------------------+--------------------------------------+---------------------------------+
+| [ ] Review Ayesha's Transcript       | [Cal] In-Person Counseling: Rahat K. | [!] Verify Bank Statement       |
+| Student: Ayesha Rahman (ST-1024)     | Time: 11:00 AM - 12:00 PM (Dhaka)   | Student: Emerson Saris          |
+| Due: 21 Sep · Owner: Nadia           | Counselor: Sarah Islam               | Overdue by 24h · Owner: Rifat   |
+| Priority: [ High ]                   | Room: Counseling Desk 02             | Priority: [ URGENT ]            |
++--------------------------------------+--------------------------------------+---------------------------------+
+```
 
-#### 3.11.3 Functional Requirements
-- **REQ-OPS-001:** The system SHALL provide staff check-in and check-out attendance logging, recording exact server timestamp and client network IP address.
-- **REQ-OPS-002:** The system SHALL provide a task management engine allowing supervisors to assign tasks linked to specific student files with due dates and priority tiers (`Urgent`, `Normal`, `Low`).
-- **REQ-OPS-003:** If an assigned task reaches its deadline without being marked `Completed`, the system SHALL escalate the task tag to `Overdue` and trigger an alert to the Branch Manager.
-- **REQ-OPS-004:** The system SHALL provide appointment scheduling for student counseling and document submission sessions with calendar conflict detection for counselors.
-- **REQ-OPS-005:** The system SHALL record a formal handover audit log whenever a student file is transferred between branches (e.g., Tangail Branch to Dhaka Head Office).
+#### 3.10.2 Stimulus / Response Sequences
+- **Stimulus:** Counselor clicks `+ Create New Task`.
+- **Response:** System displays the **"Create New Task"** modal dialog with task title, assignee, student binder, date/time, and priority tier.
+- **Stimulus:** Counselor submits the task.
+- **Response:** System inserts task into assignee's queue, displays calendar reminder, and schedules notification 24 hours prior to deadline.
+- **Stimulus:** Task deadline passes without being checked completed.
+- **Response:** System automatically moves task to `Overdue Escalations` and alerts the Branch Manager.
+
+#### 3.10.3 Functional Requirements
+- **REQ-TASK-001 (Task & Appointment Board):** The system SHALL render categorized task columns: `Today's Tasks`, `Upcoming Appointments`, and `Overdue Escalations`.
+- **REQ-TASK-002 (Create New Task Modal):** The system SHALL provide a creation modal capturing:
+  1. `Task Title*`: Action item description (e.g., *"Review Ayesha's Transcript"*).
+  2. `Assign To*`: Counselor dropdown.
+  3. `Related Student`: Searchable student dropdown selector.
+  4. `Due Date & Time*`: Calendar date/time picker.
+  5. `Priority*`: Dropdown selector (`Normal`, `High`, `Urgent`).
+  6. `Description / Remarks`: Detailed instructions.
+- **REQ-TASK-003 (Task Completion & SLA Escalation):** Checking a task complete SHALL timestamp the record and clear alerts. Tasks remaining uncompleted after deadline SHALL automatically escalate to `Overdue` and notify branch management.
 
 ---
 
-### 3.12 System Feature: Communication Firewall & Student Self-Service Portal
+### 3.11 System Feature: Omni-Channel Communication Hub
 
-#### 3.12.1 Description & Priority
-Delivers a dedicated external portal for applicants while enforcing a strict data privacy firewall between internal staff notes and student-visible notices.  
+#### 3.11.1 Description & Priority
+Delivers an integrated messaging inbox for counselors to communicate with students across multiple channels while maintaining a strict privacy firewall against internal notes.  
 **Priority:** Must Have (M).
 
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                            OMNI-CHANNEL COMMUNICATION HUB                                     |
++--------------------------+-------------------------------------------------------+----------------------------+
+| CONVERSATIONS (Search)   | ACTIVE CHAT: Rahat Khan (STU-0248 · Canada · Sarah)   | STUDENT QUICK DOSSIER      |
++--------------------------+-------------------------------------------------------+----------------------------+
+| [Avatar] Rahat Khan      | [Rahat Khan · 10:14 AM]                               | Name: Rahat Khan           |
+| "I uploaded the scan..." | Hello Sarah, I uploaded the final transcript page.    | Phone: +880 1732-423242    |
+| 10:15 AM · [WhatsApp]    |                                                       | Target: Canada (MSc CS)    |
+|                          | [Sarah Islam · 10:16 AM]                              | Stage: Offer Received      |
+| [Avatar] Zaire W.        | Received Rahat. Our admissions team is reviewing now. |                            |
+| "When is the deadline?"  |                                                       | [Quick Notes / Follow-up]  |
+| Yesterday · [Portal]     | +---------------------------------------------------+ | "Parent meeting scheduled  |
+|                          | | Type your message here...                  [Send] | |  for next Monday."         |
+|                          | +---------------------------------------------------+ |                            |
++--------------------------+-------------------------------------------------------+----------------------------+
+```
+
+#### 3.11.2 Stimulus / Response Sequences
+- **Stimulus:** Counselor selects Rahat Khan from the conversation list.
+- **Response:** Center pane loads chat history; right pane loads Student Quick Dossier (contact, destination, stage, follow-up notes).
+- **Stimulus:** Counselor types a message and clicks `Send`.
+- **Response:** System delivers message to student self-service portal (and WhatsApp if connected), logs event, and updates thread preview.
+
+#### 3.11.3 Functional Requirements
+- **REQ-COMM-001 (Unified Conversation List):** The system SHALL display conversation threads tagged by channel (`Portal Message`, `WhatsApp`, `Email`, `SMS`) with unread badge indicators and search.
+- **REQ-COMM-002 (Message Thread Pane):** The chat window SHALL display chronological incoming and outgoing messages with delivery timestamps, author signatures, and file attachments.
+- **REQ-COMM-003 (Student Quick Dossier Sidebar):** The communication view SHALL display a persistent right-hand sidebar rendering the student's key profile metadata: Full Name, Phone, Target Country, Application Stage, and Counselor Private Notes.
+- **REQ-COMM-004 (Data Privacy Firewall):** Counselor Private Notes entered in the quick dossier SHALL NOT be transmitted to student-facing channels or APIs.
+
+---
+
+### 3.12 System Feature: Accounts & Finance Dashboard
+
+#### 3.12.1 Description & Priority
+Administers agency service fee billing (BDT), university commission aging (foreign currencies), and branch office operational expense approvals.  
+**Priority:** Must Have (M).
+
+```
++---------------------------------------------------------------------------------------------------------------+
+|                                            ACCOUNTS & FINANCE DASHBOARD                                       |
+| [ Total Revenue (BDT) ]      | [ Commission Received ]      | [ Pending Receivables ]      | [ Office Expenses]|
+| ৳ 50,00,000 (+3% MoM)        | ৳ 12,20,000 (Equivalent)     | ৳ 8,50,000                   | ৳ 4,20,000 (BDT)  |
++---------------------------------------------------------------------------------------------------------------+
+| [ STUDENT SERVICE INVOICES ]       [ UNIVERSITY COMMISSIONS ]       [ OFFICE EXPENSES & APPROVALS ]           |
++----------+------------------+---------------------+--------------+--------+---------------+-------------------+
+| Inv No   | Student Name     | Service Description | Amount (BDT) | Method | Status        | Action            |
++----------+------------------+---------------------+--------------+--------+---------------+-------------------+
+| ST-INV026| Rahat Khan       | App Support Service | ৳ 5,000      | bKash  | Paid [OK]     | [View Receipt]    |
+| ST-INV027| Zaire Westervelt | Visa File Opening   | ৳ 10,000     | Bank   | Paid [OK]     | [View Receipt]    |
+| ST-INV028| Emerson Saris    | Full Case Package   | ৳ 15,000     | --     | Unpaid [Warn] | [Send Reminder]   |
++----------+------------------+---------------------+--------------+--------+---------------+-------------------+
+```
+
 #### 3.12.2 Stimulus / Response Sequences
-- **Stimulus:** Counselor logs an internal assessment note: *"Student sponsor bank statement appears questionable; verify with tax documents."*
-- **Response:** System saves note to internal case history; verifies privacy flag; ensures note is strictly excluded from student portal APIs.
-- **Stimulus:** Counselor creates a student message: *"Please upload the missing final page of your transcript."*
-- **Response:** System transmits message to the student portal and dispatches an automated notification alert.
+- **Stimulus:** Finance Officer opens the `Accounts & Finance` dashboard.
+- **Response:** System displays 4 high-level KPI metric cards (`Total Revenue`, `Total Commission Received`, `Pending Receivables`, `Total Office Expenses`) and tabbed financial ledgers.
+- **Stimulus:** Officer clicks `[View Receipt]` on a paid invoice.
+- **Response:** System generates a branded PDF payment receipt (`ST-RCP-XXXX`) with tax invoice number, student ID, payment method, and signature.
+- **Stimulus:** Officer navigates to `University Commissions` tab.
+- **Response:** System displays international receivables grouped by aging ($>30, >60, >90$ days) in original foreign currencies (AUD, CAD, GBP, EUR, USD).
 
 #### 3.12.3 Functional Requirements
-- **REQ-COMM-001:** The system SHALL enforce an architectural Data Privacy Firewall:
-  - `Internal Notes`: Accessible only to authenticated agency personnel holding appropriate permissions.
-  - `Student-Visible Messages`: Transparent updates, document remediation requests, and milestone notices displayed on the student portal.
-- **REQ-PORT-001:** The Student Self-Service Portal SHALL provide authenticated students with:
-  1. An 8-stage visual application progress tracker (*Created $\rightarrow$ Started $\rightarrow$ Reviewed $\rightarrow$ Submitted $\rightarrow$ Offer Received $\rightarrow$ Admission Processing $\rightarrow$ Pre-arrival $\rightarrow$ Arrival*).
-  2. Document upload and replacement station.
-  3. Invoice review and receipt download.
-  4. Secure messaging channel with their assigned counselor.
-- **REQ-PORT-002:** The student portal SHALL NOT display internal commission calculations, internal risk flags, university contact person emails, or other applicants' files under any operational condition.
+- **REQ-FIN-001 (Finance KPI Metrics Bar):** The system SHALL display 4 global financial KPI cards:
+  1. `Total Revenue (BDT)`: Cumulative collected agency service fees.
+  2. `Total Commission Received`: Foreign university commissions cleared into local bank accounts.
+  3. `Pending Receivables`: Invoiced commissions and unpaid student fees awaiting clearance.
+  4. `Total Office Expenses`: Cumulative approved branch operational costs.
+- **REQ-FIN-002 (Tabbed Financial Sub-Systems):** The finance module SHALL provide three distinct ledger sub-views:
+  - *Student Service Invoices:* BDT billing for student counseling, file opening, and visa packages.
+  - *University Commissions:* Multi-currency commission tracking against partner university intake enrollments.
+  - *Office Expenses & Approvals:* Branch utility, rent, internet, and stationery expense claims requiring manager sign-off.
+- **REQ-FIN-003 (Strict Multi-Currency Isolation):** Agency service fee transactions SHALL be maintained exclusively in Bangladeshi Taka (BDT); university commissions SHALL be calculated and tracked in their foreign currencies until official bank credit advice reconciliation.
 
 ---
 
