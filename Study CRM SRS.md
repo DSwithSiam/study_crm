@@ -269,7 +269,42 @@ Governs the public entry point for study abroad consultancy agencies, multi-chan
 - **Stimulus:** Platform Super Admin opens the "Demo Requests Queue", reviews agency credentials, and clicks "Approve Demo".
 - **Response:** System provisions an isolated agency tenant workspace (`agency_id`), initializes default branches, sets demo trial expiration (e.g., 14 days), generates the Agency Admin credentials, and sends an activation email with login link.
 
-#### 3.1.3 Functional Requirements
+#### 3.1.3 Onboarding & Staff Authorization Lifecycle Flowchart
+
+```mermaid
+flowchart TD
+    classDef platform fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px,color:#4c1d95;
+    classDef company fill:#eff6ff,stroke:#2563eb,stroke-width:1.5px,color:#1e40af;
+    classDef review fill:#fffbeb,stroke:#d97706,stroke-width:1.5px,color:#92400e;
+    classDef staff fill:#f0fdf4,stroke:#16a34a,stroke-width:1.5px,color:#14532d;
+    classDef finish fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d;
+
+    subgraph P1 ["1. Platform & Onboarding"]
+        S1(["1. StudyCRM Dev Admin"]):::platform
+        --> S2["2. Company Registration"]:::company
+        --> S3["3. Email Verification"]:::company
+        --> S4["4. Pending Review"]:::review
+        --> S5["5. Dev Admin Approval"]:::review
+    end
+
+    subgraph P2 ["2. Company Setup"]
+        S5 --> S6["6. Company Initialization"]:::company
+        --> S7["7. Company Owner Login"]:::company
+        --> S8["8. Create Branch"]:::company
+        --> S9["9. Invite Staff"]:::company
+        --> S10["10. Assign Role + Scope"]:::company
+    end
+
+    subgraph P3 ["3. Staff Access"]
+        S10 --> S11["11. Staff Accepts Invitation"]:::staff
+        --> S12["12. Staff Login"]:::staff
+        --> S13(["13. Authorization Works"]):::finish
+    end
+```
+
+*For quick reference, see [FLOWCHART.md](file:///home/siam/projects/study_crm/FLOWCHART.md).*
+
+#### 3.1.4 Functional Requirements
 - **REQ-AGY-001:** The system SHALL provide a public Agency Registration interface capturing: `Organization Name`, `Agency Admin Full Name`, `Work Email Address`, `Phone / WhatsApp Number`, and `Password` (with confirmation).
 - **REQ-AGY-002:** The system SHALL generate an automated 6-digit numeric verification OTP with a 5-minute Time-To-Live (TTL) upon agency signup and deliver it via transactional SMS/Email.
 - **REQ-AGY-003:** The system SHALL permit only verified accounts to submit a Demo Workspace Request, capturing operational details: `Estimated Annual Student Volume`, `Primary Destination Countries`, `Planned Branch Count`, and `Consultancy License / Business Notes`.
