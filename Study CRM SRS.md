@@ -1270,7 +1270,70 @@ CREATE TABLE office_expenses (
 );
 
 -- ============================================================================
--- 10. OPERATIONS: ATTENDANCE & SECURITY AUDIT LOGS
+-- 10. TASKS & APPOINTMENTS MANAGEMENT
+-- ============================================================================
+CREATE TABLE tasks (
+    id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+    branch_id INT REFERENCES branches(id) ON DELETE RESTRICT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    assigned_to INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    student_id INT REFERENCES students(id) ON DELETE SET NULL,
+    due_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    priority VARCHAR(20) NOT NULL DEFAULT 'Normal', -- 'Low', 'Normal', 'High', 'Urgent'
+    status VARCHAR(30) NOT NULL DEFAULT 'Pending',   -- 'Pending', 'In Progress', 'Completed', 'Overdue'
+    created_by INT REFERENCES users(id) ON DELETE SET NULL,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE appointments (
+    id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+    branch_id INT NOT NULL REFERENCES branches(id) ON DELETE RESTRICT,
+    title VARCHAR(255) NOT NULL,
+    student_id INT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    counselor_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    appointment_type VARCHAR(50) NOT NULL, -- 'In-Person', 'Virtual Zoom', 'Phone Counseling'
+    scheduled_start TIMESTAMP WITH TIME ZONE NOT NULL,
+    scheduled_end TIMESTAMP WITH TIME ZONE NOT NULL,
+    room_or_link VARCHAR(255),
+    status VARCHAR(30) NOT NULL DEFAULT 'Scheduled', -- 'Scheduled', 'Completed', 'Cancelled', 'No-Show'
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================================
+-- 11. OMNI-CHANNEL COMMUNICATIONS & MESSAGING
+-- ============================================================================
+CREATE TABLE communication_threads (
+    id SERIAL PRIMARY KEY,
+    agency_id INT NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+    student_id INT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    channel VARCHAR(30) NOT NULL DEFAULT 'Portal', -- 'Portal', 'WhatsApp', 'Email', 'SMS'
+    external_thread_id VARCHAR(100),
+    counselor_quick_notes TEXT,
+    last_message_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE communication_messages (
+    id SERIAL PRIMARY KEY,
+    thread_id INT NOT NULL REFERENCES communication_threads(id) ON DELETE CASCADE,
+    sender_type VARCHAR(20) NOT NULL, -- 'Staff', 'Student', 'System'
+    sender_user_id INT REFERENCES users(id) ON DELETE SET NULL,
+    content TEXT NOT NULL,
+    attachment_storage_path TEXT,
+    is_private_internal_note BOOLEAN DEFAULT FALSE,
+    is_read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================================
+-- 12. OPERATIONS: ATTENDANCE & SECURITY AUDIT LOGS
 -- ============================================================================
 CREATE TABLE attendance (
     id SERIAL PRIMARY KEY,
